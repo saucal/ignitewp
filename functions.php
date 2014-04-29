@@ -4,17 +4,8 @@ define("SAUCAL_TPL_BASEURL", get_stylesheet_directory_uri());
 define("SAUCAL_TPL_BASE", get_stylesheet_directory());
 define("SAUCAL_TPL_INCL", SAUCAL_TPL_BASE."/inc/");
 
-//Load all libraries
-if ($handle = opendir(SAUCAL_TPL_INCL)) {
-    while (false !== ($file = readdir($handle))) {
-        if ('.' === $file) continue;
-        if ('..' === $file) continue;
-
-        if(!is_dir($file))
-        	require_once(SAUCAL_TPL_INCL.$file);
-    }
-    closedir($handle);
-}
+//Init theme libraries
+require_once(SAUCAL_TPL_INCL."core.php");
 
 //Disable Admin Bar
 show_admin_bar( false ); 

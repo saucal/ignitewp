@@ -28,6 +28,9 @@ function mjt_sso_login(){
     return $sso_login_str;
 }
 
+//var_dump(SAUCAL_TPL_BASE . '/disqus-comments-template.php');
+//var_dump(file_exists(SAUCAL_TPL_LIB_DIR(__FILE__) . '/theme/disqus-comments-template.php'));
+
 function mjt_comments_template($value) {
     global $EMBED;
     global $post;
@@ -45,6 +48,7 @@ function mjt_comments_template($value) {
     // path, use that instead of the default bundled comments.php
     //return TEMPLATEPATH . '/disqus-comments.php';
     $EMBED = true;
-    return SAUCAL_TPL_BASE . '/disqus-comments-template.php';
+    //return SAUCAL_TPL_BASE . '/disqus-comments-template.php';
+    return SAUCAL_TPL_LIB_DIR(__FILE__) . '/theme/disqus-comments-template.php';
 }
 ?>

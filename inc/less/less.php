@@ -6,7 +6,7 @@ function SLESS_add_script(){
 			env: "production"
 		};
 	</script>
-	<script src="<?= SAUCAL_TPL_BASEURL ?>/js/vendor/less-1.7.0.min.js"></script>
+	<script src="<?= SAUCAL_TPL_LIB_URL(__FILE__) ?>/js/less-1.7.0.min.js"></script>
 	<?php
 }
 
