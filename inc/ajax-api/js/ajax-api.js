@@ -216,6 +216,7 @@
     	contentBuffer.add(content);
     	content.trigger("contentReady");
 		content.data("contentAlreadyLoaded", true);
+		content.trigger("contentLoad");
     }
     SAUCAL_AJAX_API.prototype.markLinks = function(href){
 		$(ajaxAPI.config.menuSelector.menu+" "+ajaxAPI.config.menuSelector.item+" a").each(function(){
