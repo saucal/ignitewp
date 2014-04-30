@@ -752,12 +752,9 @@
 			var callbacks = item.callbacks;
 
 			if(thisIsThat.css("display") !== "none"){
-				thisIsThat.css({
-					width: "",
-					height: ""
-				});
 				var widthn = thisIsThat.width(),
 					heightn = thisIsThat.height();
+
 				//console.log(width, " ", widthn, " | ", height, " ", heightn);
 				if(item.width != widthn || item.height != heightn){
 					thisRef.elemsToCheck[i].width = widthn;
