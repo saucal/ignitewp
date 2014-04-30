@@ -1,18 +1,36 @@
 <?php
-function SUISC_firstLastClasses($atts){
+global $SUISC_perc;
+$SUISC_perc = 0;
+
+function SUISC_firstLastClasses($atts, $cols, $totalCols){
+    global $SUISC_perc;
+    $thisPerc = $cols/$totalCols*100;
+
 	$additionalClass = "";
-    if (in_array("first", $atts)) {
+    if (in_array("first", $atts) || $SUISC_perc == 0) {
         $additionalClass .= "first ";
     }
-    if (in_array("last", $atts)) {
+    if (in_array("last", $atts) || ceil($SUISC_perc + $thisPerc) == 100) {
         $additionalClass .= "last ";
     } 
+    $SUISC_perc += $thisPerc;
+    if(ceil($SUISC_perc) >= 100) $SUISC_perc = 0;
+
     return $additionalClass;
 }
+
+function SUISC_resetPercCount($content){
+    global $SUISC_perc;
+    $SUISC_perc = 0;
+    return $content;
+}
+
+add_filter("the_content", "SUISC_resetPercCount", 12); //This resets the percentage fill count to 0 after the shortcodes has been executed.
+
 add_shortcode( "one-third", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
     $ret = "";
-    $additionalClass = SUISC_firstLastClasses($atts);
+    $additionalClass = SUISC_firstLastClasses($atts, 1, 3);
     
     $ret .= "<div class='one-third ".$additionalClass."'>".do_shortcode($cont)."</div>";
     return $ret;
@@ -20,7 +38,7 @@ add_shortcode( "one-third", function($atts, $cont = NULL){
 add_shortcode( "two-third", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
     $ret = "";
-    $additionalClass = SUISC_firstLastClasses($atts);
+    $additionalClass = SUISC_firstLastClasses($atts, 2, 3);
     
     $ret .= "<div class='two-third ".$additionalClass."'>".do_shortcode($cont)."</div>";
     return $ret;
@@ -29,7 +47,7 @@ add_shortcode( "two-third", function($atts, $cont = NULL){
 add_shortcode( "one-half", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
     $ret = "";
-    $additionalClass = SUISC_firstLastClasses($atts);
+    $additionalClass = SUISC_firstLastClasses($atts, 1, 2);
     
     $ret .= "<div class='one-half ".$additionalClass."'>".do_shortcode($cont)."</div>";
     return $ret;
@@ -38,7 +56,7 @@ add_shortcode( "one-half", function($atts, $cont = NULL){
 add_shortcode( "one-fourth", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
     $ret = "";
-    $additionalClass = SUISC_firstLastClasses($atts);
+    $additionalClass = SUISC_firstLastClasses($atts, 1, 4);
     
     $ret .= "<div class='one-fourth ".$additionalClass."'>".do_shortcode($cont)."</div>";
     return $ret;
@@ -47,7 +65,7 @@ add_shortcode( "one-fourth", function($atts, $cont = NULL){
 add_shortcode( "two-fourth", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
     $ret = "";
-    $additionalClass = SUISC_firstLastClasses($atts);
+    $additionalClass = SUISC_firstLastClasses($atts, 2, 4);
     
     $ret .= "<div class='two-fourth ".$additionalClass."'>".do_shortcode($cont)."</div>";
     return $ret;
@@ -56,7 +74,7 @@ add_shortcode( "two-fourth", function($atts, $cont = NULL){
 add_shortcode( "three-fourth", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
     $ret = "";
-    $additionalClass = SUISC_firstLastClasses($atts);
+    $additionalClass = SUISC_firstLastClasses($atts, 3, 4);
     
     $ret .= "<div class='three-fourth ".$additionalClass."'>".do_shortcode($cont)."</div>";
     return $ret;
