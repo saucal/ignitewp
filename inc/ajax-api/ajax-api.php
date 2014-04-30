@@ -22,4 +22,15 @@ function saucal_get_footer(){
     	do_action("saucal_ajax_get_header");
     }
 }
+
+add_action( "init", function(){
+    wp_register_script( SAUCAL_TPL_ID."-ajax-api", SAUCAL_TPL_LIB_URL(__FILE__)."/js/ajax-api.js", array(), "3.0", false );
+});
+
+add_action( "wp_enqueue_scripts", function(){
+    wp_localize_script( SAUCAL_TPL_ID."-ajax-api", "ajax_api", array(
+        "admin_url" => admin_url()
+    ));
+    wp_enqueue_script( SAUCAL_TPL_ID."-ajax-api" );
+}, 100);
 ?>
