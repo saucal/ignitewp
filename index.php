@@ -9,19 +9,9 @@
         <title><?php wp_title(); ?></title>
         <meta name="viewport" content="width=device-width">
 
-        <link rel="stylesheet" href="<?= SAUCAL_TPL_BASEURL ?>/css/vendor/bootstrap.min.css">
-
         <?php wp_head(); ?>
 
-        <script src="<?= SAUCAL_TPL_BASEURL ?>/js/vendor/bootstrap.min.js"></script>
-        <script src="<?= SAUCAL_TPL_BASEURL ?>/js/inc/bootstrap-responsive-extension.js"></script>
-        <script src="<?= SAUCAL_TPL_BASEURL ?>/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-
-        <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
-
         <link rel="stylesheet" href="<?= SAUCAL_TPL_BASEURL ?>/css/vendor/normalize.css">
-        <link rel="stylesheet" href="<?= SAUCAL_TPL_BASEURL ?>/css/vendor/bootstrap-responsive.min.css">
-        <link rel="stylesheet" href="<?= SAUCAL_TPL_BASEURL ?>/css/inc/bootstrap-responsive-extension.css">
     </head>
     <body>
         <p>Hello world! This is HTML5 Boilerplate.</p>
