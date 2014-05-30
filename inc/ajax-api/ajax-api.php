@@ -29,7 +29,8 @@ add_action( "init", function(){
 
 add_action( "wp_enqueue_scripts", function(){
     wp_localize_script( SAUCAL_TPL_ID."-ajax-api", "ajax_api", array(
-        "admin_url" => admin_url()
+        "admin_url" => admin_url(),
+        "login_url" => wp_login_url()
     ));
     wp_enqueue_script( SAUCAL_TPL_ID."-ajax-api" );
 }, 100);

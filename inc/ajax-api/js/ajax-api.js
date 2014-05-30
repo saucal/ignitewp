@@ -16,6 +16,17 @@
 	    }
 	    return str;
 	}
+	window.compareURLs = function(a, b){
+		if(a == b){
+			return true;
+		} else if(a.endsWith("/") && a == b+"/"){
+			return true;
+		} else if(b.endsWith("/") && b == a+"/"){
+			return true;
+		} else {
+			return false;
+		}
+	}
 	window.addParam = function(url, _param, _value) {
 	    var a = document.createElement('a');
 	    a.href = url;
@@ -214,6 +225,7 @@
     SAUCAL_AJAX_API.prototype.init = function(){
     	var content = $(this.config.contentSelector);
     	contentBuffer.add(content);
+		content.trigger( "showingPage" );
     	content.trigger("contentReady");
 		content.data("contentAlreadyLoaded", true);
 		content.trigger("contentLoad");
@@ -229,7 +241,7 @@
 					.removeClass("current-menu-parent")
 					.removeClass("current-menu-ancestor")
 		}).filter(function(){
-			return clearHashFromURL($(this).attr("href")) == href;
+			return compareURLs(clearHashFromURL($(this).attr("href")), href);
 		}).each(function(){
 			$(this).parent().addClass("current-menu-item").addClass("current_page_item")
 				.parentsUntil(ajaxAPI.config.menuSelector.menu, ajaxAPI.config.menuSelector.item)
@@ -251,6 +263,10 @@
 
 		//check if it's not a WP-Admin url we're accessing.
 		if(url.startsWith(ajax_api.admin_url))
+			return false;
+
+		//check if it's not a WP-login url we're accessing.
+		if(url.startsWith(ajax_api.login_url))
 			return false;
 
 		//avoid extensions that are known filetypes
@@ -350,7 +366,6 @@
 
     SAUCAL_AJAX_API.prototype.showPage = function(newContent){
 		var href = newContent.data("url");
-		document.title = newContent.data("title");
 		
 		ajaxAPI.markLinks(href);
 
@@ -358,6 +373,13 @@
 
 		$(ajaxAPI.config.contentSelector).fadeOut(200, function(){
 			newContent.hide().insertAfter($(this));
+
+			var e = jQuery.Event( "showingPage" );
+			newContent.trigger( e );
+			if(!e.isDefaultPrevented()){
+				document.title = newContent.data("title");
+			}
+
 			if(!newContent.data("contentAlreadyLoaded")){
 				newContent.trigger("contentReady");
 				newContent.data("contentAlreadyLoaded", true);

@@ -1,10 +1,11 @@
+.one-full {
+	width: 100%;
+	float: left;
+}
 .one-half {
 	width: 49%;
 	margin-left: 2%;
 	float: left;
-}
-.one-half.first {
-	margin-left: 0%;
 }
 
 .one-third {
@@ -12,16 +13,10 @@
 	margin-left: 2%;
 	float: left;
 }
-.one-third.first {
-	margin-left: 0%;
-}
 .two-third {
 	width: 66%;
 	margin-left: 2%;
 	float: left;
-}
-.two-third.first {
-	margin-left: 0%;
 }
 
 .one-fourth {
@@ -29,22 +24,17 @@
 	margin-left: 2%;
 	float: left;
 }
-.one-fourth.first {
-	margin-left: 0%;
-}
 .two-fourth {
 	width: 49%;
 	margin-left: 2%;
 	float: left;
-}
-.two-fourth.first {
-	margin-left: 0%;
 }
 .three-fourth {
 	width: 74.5%;
 	margin-left: 2%;
 	float: left;
 }
-.three-fourth.first {
+
+.sc-column.first {
 	margin-left: 0%;
 }

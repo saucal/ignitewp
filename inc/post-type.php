@@ -226,7 +226,7 @@ Class SaucalCPT {
 		$meta_boxes = $this->opts["meta_boxes"];
 		foreach($meta_boxes as $id => $meta_box) {
 			$metaboxID = "meta_box_".$id;
-			$thisPost = $_POST[$metaboxID];
+			if ( isset( $_POST[$metaboxID] ) ) $thisPost = $_POST[$metaboxID];
 
 			
 			// Check if our nonce is set.
