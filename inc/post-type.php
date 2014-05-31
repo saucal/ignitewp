@@ -154,15 +154,54 @@ Class SaucalCPT {
 		');
 		add_action('manage_'.$slug.'_posts_custom_column',  $func, 10, 2);
 	
+		$this->register_meta_boxes();
+	}
+	
+	function register_meta_boxes(){
+		$meta_boxes = $this->opts["meta_boxes"];
+		return register_custom_meta_boxes($this->opts["slug"], $this->opts["meta_boxes"]);
+	}
+	
+}
+
+Class SaucalCMB {
+	var $defaults;
+	var $opts;
+	function SaucalCMB($post_type, $metaboxes = array(), $template = false){
+		$this->defaults = array(
+			"slug" => $post_type,
+			"meta_boxes" => $metaboxes,
+			"template" => $template
+		);
+
+		if(is_array($metaboxes)){
+			$this->opts = array_merge($this->defaults, $metaboxes);
+		}
+		extract($this->opts);
 		add_action("add_meta_boxes", array($this, "register_meta_boxes"));
 		add_action('save_post', array( $this, 'save_meta_box' ) );
-		
-		
 	}
 	function register_meta_boxes(){
 		//global $wp_meta_boxes;
 		//var_export($wp_meta_boxes);
 		//exit;
+		global $post;
+
+		$render = true;
+		if($post->post_type != $this->opts["slug"]){
+			$render = false;
+		}
+
+		if($this->opts["template"] !== false && is_string($this->opts["template"])){
+			$template_file = get_post_meta($post->ID,'_wp_page_template',TRUE);
+			if($this->opts["template"].".php" != $template_file && $this->opts["template"] != $template_file){
+				$render = false;
+			}
+		}
+
+		if(!$render)
+			return;
+
 		$meta_boxes = $this->opts["meta_boxes"];
 		foreach($meta_boxes as $id => $meta_box) {
 			$mbDefaults = array(
@@ -185,6 +224,13 @@ Class SaucalCPT {
 		wp_nonce_field( $metaboxID, $metaboxID.'[_wpnonce]' );
 
 		foreach($metabox["fields"] as $meta => $field){
+			$fldDefaults = array(
+				"name" => "Field",
+	            "type" => "text",
+			);
+
+			$field = array_merge($fldDefaults, $field);
+
 			// Use get_post_meta to retrieve an existing value from the database.
 			$value = get_post_meta( $post->ID, '_'.$meta, true );
 
@@ -262,6 +308,11 @@ Class SaucalCPT {
 if(!function_exists("register_custom_post_type")){
 	function register_custom_post_type($name, $attr = null) {
 		return new SaucalCPT($name, $attr);
+	}
+}
+if(!function_exists("register_custom_meta_boxes")){
+	function register_custom_meta_boxes($post_type, $meta_boxes = array(), $template = false) {
+		return new SaucalCMB($post_type, $meta_boxes, $template);
 	}
 }
 
