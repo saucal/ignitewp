@@ -1,7 +1,7 @@
 <?php 
 class SaucalCTR
 {
-	var $rules;
+	var $rules = array();
 	var $vars = array('custom_template');
 	function SaucalCTR() {
 		add_action( 'init', array($this, "add_rules"));
@@ -50,7 +50,6 @@ class SaucalCTR
 		}
 	}
 }
-
 $SCTRManager = new SaucalCTR();
 
 function add_custom_template_rewrite($rewrite, $template, $vars = array()){
