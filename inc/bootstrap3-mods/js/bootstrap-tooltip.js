@@ -95,6 +95,12 @@
 		return {
 			promise: function(){
 				return thisDef.promise();
+			},
+			on: function(event, delegate, callback){
+				if(event == "shown")
+					event = "shown.bs.modal";
+
+				widgetBigArea.on(event, delegate, callback);
 			}
 		};
 	}

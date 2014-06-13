@@ -6,9 +6,21 @@ add_action("init", function(){
         remove_filter('comments_template', 'dsq_comments_template');
         add_filter('comments_template', 'mjt_comments_template');
     }
+    wp_register_script( SAUCAL_TPL_ID."-disqus-tools", SAUCAL_TPL_LIB_URL(__FILE__)."/js/disqus-tools.js", array("jquery"), "1.1", false );
     //var_dump($wp_filter["comments_template"]);
     //exit;
 });
+
+add_action( "wp_enqueue_scripts", function(){
+    wp_enqueue_script( SAUCAL_TPL_ID."-disqus-tools" );
+    wp_localize_script( SAUCAL_TPL_ID."-disqus-tools", "disqusGlobalConfig", array(
+        "perform_automatic_sync" => !get_option('disqus_manual_sync'),
+        "disqus_script_url" => strtolower(get_option('disqus_forum_url')) . '.' . DISQUS_DOMAIN . '/embed.js?pname=wordpress&pver=' . DISQUS_VERSION,
+        "default_url" => site_url("/"),
+        "language" => apply_filters('disqus_language_filter', ''),
+        "shortname" => get_option('disqus_forum_url'),
+    ) );
+}, 5);
 
 function mjt_sso_login(){
     global $current_site;
