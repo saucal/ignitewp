@@ -142,7 +142,8 @@
 				value: undefined,
 				noLabel: false,
 				"required": false,
-				"validate": false
+				"validate": false,
+				"note": false
 			}, field);
 			
 
@@ -161,7 +162,9 @@
 				var fieldContainer = newDiv("col-sm-"+(12-options.labelWidth)+" "+options.id+"_"+id+"_cont"+(field.noLabel ? " col-sm-offset-"+options.labelWidth : "")).appendTo(fieldElem);
 				var fieldInput = getFieldInput(id, field);
 				fieldInput.appendTo(fieldContainer);
-				
+
+				if(field.note)
+					var noteMsg = newDiv("help-block").html(field.note).appendTo(fieldContainer);			
 
 				var note = newDiv("help-block note").hide().appendTo(fieldContainer);
 			}

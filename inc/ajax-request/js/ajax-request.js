@@ -1,5 +1,9 @@
 (function($){
 	window.ajaxPost = function(action, _data, callback){
+		if( typeof _data === "function"){
+			callback = _data;
+			_data = {};
+		}
 		if ( typeof _data !== "string" ) {
 			_data = jQuery.param( _data, false );
 		}
