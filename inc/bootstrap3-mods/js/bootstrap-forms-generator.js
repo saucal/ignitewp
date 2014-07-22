@@ -170,12 +170,16 @@
 			}
 		});
 
+		form.data("validated", true);
 		if(options.validateForm){
 			form.on("submit", function(e){
 				if(!form.validateForm()){
 					e.stopImmediatePropagation();
 					e.stopPropagation();
 					e.preventDefault();
+					form.data("validated", false);
+				} else {
+					form.data("validated", true);
 				}
 			});
 		}

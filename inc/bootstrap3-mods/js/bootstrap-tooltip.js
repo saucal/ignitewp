@@ -55,23 +55,31 @@
 				}, buttonInfo);
 				
 				var button = $("<button type='button' class='btn "+buttonInfo.class+"'>"+buttonInfo.text+"</button>").css(buttonInfo.css).on("click", function(){
+					if(options.submitFormsWithPrimary && $(this).is(".btn-primary") && contents.find("form").length > 0){
+						$(this).addClass('disabled');
+						contents.find("form").trigger("submit");
+						$(this).removeClass('disabled');
+						if(!contents.find("form").data("validated"))
+							return;
+
+					}
 					buttonInfo.callback.call(thisDef, button);
 				}).appendTo(buttons);
 			});
-		}
-
-		if(options.submitFormsWithPrimary){
-			var btns = contents.find("form").find("button, input[type='submit'], input[type='image']");
-			if(btns.length == 0){
-				contents.find("form").append(newElem("button").hide())
-			}
-			contents.find("form").on("submit", function(e){
-				if(buttons.find(".btn-primary").length == 1){
-					e.preventDefault();
-					if(!buttons.find(".btn-primary").hasClass('disabled'))
-						buttons.find(".btn-primary").click();
+			if(options.submitFormsWithPrimary){
+				var form = contents.find("form");
+				var btns = form.find("button, input[type='submit'], input[type='image']");
+				if(btns.length == 0){
+					form.append(newElem("button").hide())
 				}
-			});
+				form.on("submit", function(e){
+					if(buttons.find(".btn-primary").length == 1){
+						e.preventDefault();
+						if(!buttons.find(".btn-primary").hasClass('disabled'))
+							buttons.find(".btn-primary").click();
+					}
+				});
+			}
 		}
 
 		
