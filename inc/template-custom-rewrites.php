@@ -50,10 +50,38 @@ class SaucalCTR
 		}
 	}
 }
+
 $SCTRManager = new SaucalCTR();
 
 function add_custom_template_rewrite($rewrite, $template, $vars = array()){
 	global $SCTRManager;
 	$SCTRManager->add_rule($rewrite, $template, $vars);
+}
+
+function is_custom_template_rewrite($template = "") {
+	global $wp;
+	if(empty($template)){
+		return isset($wp->query_vars["custom_template"]);
+	} else {
+		if(!isset($wp->query_vars["custom_template"]))
+			return false;
+
+		if($wp->query_vars["custom_template"] == $template)
+			return true;
+		else
+			return false;
+	}
+}
+function is_not_custom_template_rewrite($templates = array()) {
+	global $wp;
+	$found = true;
+	if(!is_array($templates))
+		$templates = array($templates);
+	foreach($templates as $template) {
+		if(is_custom_template_rewrite($template)){
+			$found = false;
+		}
+	}
+	return $found;
 }
 ?>
