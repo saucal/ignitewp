@@ -1,4 +1,50 @@
 <?php
+if(!function_exists("wp_dropdown_posts")){
+	function wp_dropdown_posts( $args = '' ) {
+		$defaults = array(
+			'depth' => 0, 'child_of' => 0,
+			'selected' => 0, 'echo' => 1,
+			'name' => 'page_id', 'id' => '',
+			'show_option_none' => '', 'show_option_no_change' => '',
+			'option_none_value' => '',
+			'class' => ''
+		);
+
+		$r = wp_parse_args( $args, $defaults );
+
+		$pages = get_pages( $r );
+		
+		$output = '';
+		// Back-compat with old system where both id and name were based on $name argument
+		if ( empty( $r['id'] ) ) {
+			$r['id'] = $r['name'];
+		}
+
+		if ( ! empty( $pages ) ) {
+			$output = "<select name='" . esc_attr( $r['name'] ) . "' id='" . esc_attr( $r['id'] ) . "'" . (!empty($r['class']) ? " class='" . esc_attr( $r['class'] ) . "'" : "") . ">\n";
+			if ( $r['show_option_none'] ) {
+				$output .= "\t<option value=\"" . esc_attr( $r['option_none_value'] ) . '">' . $r['show_option_none'] . "</option>\n";
+			}
+			$output .= walk_page_dropdown_tree( $pages, $r['depth'], $r );
+			$output .= "</select>\n";
+		}
+
+		/**
+		 * Filter the HTML output of a list of pages as a drop down.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param string $output HTML output for drop down list of pages.
+		 */
+		$html = apply_filters( 'wp_dropdown_posts', $output );
+
+		if ( $r['echo'] ) {
+			echo $html;
+		}
+		return $html;
+	}
+}
+
 
 if(!class_exists("SaucalCPT")){
 	Class SaucalCPT {
@@ -13,6 +59,9 @@ if(!class_exists("SaucalCPT")){
 				"taxonomies" => array(),
 				'menu_icon' => null,
 				"hierarchical" => true,
+				"public" => true,
+				"capability_type" => "page",
+				'exclude_from_search' => true,
 				"supports" => array('thumbnail','title', 'editor', 'page-attributes'),
 				"editor_columns" => array(
 					'cb' => '<input type="checkbox" />',
@@ -27,7 +76,6 @@ if(!class_exists("SaucalCPT")){
 				$this->opts = array_merge($this->defaults, $attr);
 			}
 			extract($this->opts);
-
 
 			//Create custom taxonomies for posts
 			$taxonomies_for_post_type = array();
@@ -107,18 +155,25 @@ if(!class_exists("SaucalCPT")){
 				'all_items' => __($plural_name),
 				'items_archive' => __($single_name." Archive")
 			);
+
+			$cleanOpts = $this->opts;
+			unset($cleanOpts["single_name"]);
+			unset($cleanOpts["plural_name"]);
+			unset($cleanOpts["slug_for_archive"]);
+			unset($cleanOpts["taxonomies"]);
+
 			register_post_type( $slug,
-				array(
+				array_merge(array(
 					'labels' => $labels,
-					'public' => true,
+					//'public' => true,
 					'has_archive' => $slug_for_archive,
-					'exclude_from_search' => true,
-					'menu_icon' => $menu_icon,
-					'capability_type' => 'page',
-					'hierarchical' => $hierarchical,
-					'supports' => $supports,
-					'taxonomies' => $taxonomies_for_post_type
-				)
+					//'exclude_from_search' => true,
+					//'menu_icon' => $menu_icon,
+					//'capability_type' => 'page',
+					//'hierarchical' => $hierarchical,
+					//'supports' => $supports,
+					'taxonomies' => $taxonomies_for_post_type,
+				), $cleanOpts)
 			);
 			
 			
@@ -253,6 +308,22 @@ if(!class_exists("SaucalCMB")){
 	            		"id" => $fieldId,
 	            		"selected" => empty($value) ? "0" : $value,
 	            	));
+	            } else if($field["type"] == "post_list") {
+	            	if(!isset($field["post_type"]))
+	            		$field["post_type"] = "post";
+
+	            	if(isset($field["filter"]))
+	            		add_filter("list_pages", $field["filter"], 10, 2);
+	            	wp_dropdown_posts(array(
+	            		"post_type" => $field["post_type"],
+	            		"show_option_none" => " ",
+	            		"name" => $metaboxID.'['.$meta.']',
+	            		"class" => "widefat",
+	            		"id" => $fieldId,
+	            		"selected" => empty($value) ? "0" : $value,
+	            	));
+	            	if(isset($field["filter"]))
+	            		remove_filter("list_pages", $field["filter"], 10);
 	            } else {
 					echo '<input class="widefat" type="text" id="'.$fieldId.'" name="'.$metaboxID.'['.$meta.']"';
 						echo ' value="' . esc_attr( $value ) . '" />';
