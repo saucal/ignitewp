@@ -67,12 +67,11 @@ add_filter("style_loader_tag", function($tag){
 			$extension = array_pop($filename);
 			$filename = implode(".", $filename);
 
-			$check = md5(file_get_contents($lessFilePath));
-			$targetFileName = $filename."-".$check.".css";
+			$targetFileName = $filename.".lessc.css";
 			$targetFilePath = $lessFilePathBase."/".$targetFileName;
 			$targetFileURI = str_replace($root, $rootUrl, $targetFilePath) . $extra;
 
-			if(!file_exists($targetFilePath)) {
+			if(!file_exists($targetFilePath) || filemtime($targetFilePath) != filemtime($lessFilePath)) {
 				try{
 				    $parser = new Less_Parser();
 					$parser->parseFile( $lessFilePath, $lessFilePathBaseUrl );
@@ -82,6 +81,7 @@ add_filter("style_loader_tag", function($tag){
 					if($bytes === false) {
 						$compiled = false;
 					} else {
+						touch($targetFilePath, filemtime($lessFilePath));
 						$compiled = $targetFileURI;
 					}
 				} catch(Exception $e) {
