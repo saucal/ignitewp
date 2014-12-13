@@ -74,7 +74,7 @@ add_filter("style_loader_tag", function($tag){
 			if(!file_exists($targetFilePath) || filemtime($targetFilePath) != filemtime($lessFilePath)) {
 				try{
 				    $parser = new Less_Parser();
-					$parser->parseFile( $lessFilePath, $lessFilePathBaseUrl );
+					$parser->parseFile( $lessFilePath, str_replace( array("http:", "https:"), "", $lessFilePathBaseUrl) );
 					$css = $parser->getCss();
 					
 					$bytes = file_put_contents($targetFilePath, $css);
