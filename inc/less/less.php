@@ -44,98 +44,95 @@ function file_absolute_mtime($lessFilePath) {
 	return $m;
 }
 
-add_filter("style_loader_tag", function($tag){
-	if(strpos($tag, ".less") !== false){
+add_filter("style_loader_src", function($url){
+	if(strpos($url, ".less") !== false){
 		require_once SAUCAL_TPL_LIB_DIR(__FILE__) . '/inc/lessc.inc.php';
-		$pattern = '/href=([\'"])(.*?)\\1/';
-		preg_match($pattern, $tag, $matches);
-		$url = "";
-		if(!empty($matches[2])){
-			$url = $matches[2];
-		}
-
 		$compiled = false;
-		if(!empty($url)){
-			$data = parse_url($url);
-			$cleanUrl = "";
-			if(!empty($data["scheme"]))
-				$cleanUrl .= $data["scheme"].":";
 
-			$cleanUrl .= "//";
+		$data = parse_url($url);
+		$cleanUrl = "";
+		if(!empty($data["scheme"]))
+			$cleanUrl .= $data["scheme"].":";
 
-			if(!empty($data["user"]))
-				$cleanUrl .= $data["user"];
+		$cleanUrl .= "//";
 
-			if(!empty($data["pass"]))
-				$cleanUrl .= ":".$data["pass"];
+		if(!empty($data["user"]))
+			$cleanUrl .= $data["user"];
 
-			if(!empty($data["user"]) || !empty($data["pass"]))
-				$cleanUrl .= "@";
+		if(!empty($data["pass"]))
+			$cleanUrl .= ":".$data["pass"];
 
-			$cleanUrl .= $data["host"];	
-			
-			if(!empty($data["port"]))
-				$cleanUrl .= ":".$data["port"];	
+		if(!empty($data["user"]) || !empty($data["pass"]))
+			$cleanUrl .= "@";
 
-			if(!empty($data["path"]))
-				$cleanUrl .= $data["path"];
+		$cleanUrl .= $data["host"];	
+		
+		if(!empty($data["port"]))
+			$cleanUrl .= ":".$data["port"];	
 
-			$extra = "";
+		if(!empty($data["path"]))
+			$cleanUrl .= $data["path"];
 
-			if(!empty($data["query"]))
-				$extra .= "?".$data["query"];
+		$extra = "";
 
-			if(!empty($data["fragment"]))
-				$extra .= "#".$data["fragment"];		
+		if(!empty($data["query"]))
+			$extra .= "?".$data["query"];
+
+		if(!empty($data["fragment"]))
+			$extra .= "#".$data["fragment"];		
 
 
-			$root = get_theme_root();
-			$rootUrl = get_theme_root_uri();
+		$root = get_theme_root();
+		$rootUrl = get_theme_root_uri();
 
-			$lessFilePath = str_replace($rootUrl, $root, $cleanUrl);
-			$lessFilePathBaseUrl = dirname($cleanUrl);
-			$lessFilePathBase = str_replace($rootUrl, $root, $lessFilePathBaseUrl);
+		$lessFilePath = str_replace($rootUrl, $root, $cleanUrl);
+		$lessFilePathBaseUrl = dirname($cleanUrl);
+		$lessFilePathBase = str_replace($rootUrl, $root, $lessFilePathBaseUrl);
 
-			$filename = explode(".", basename($lessFilePath));
-			$extension = array_pop($filename);
-			$filename = implode(".", $filename);
+		$filename = explode(".", basename($lessFilePath));
+		$extension = array_pop($filename);
+		$filename = implode(".", $filename);
 
-			$targetFileName = $filename.".lessc.css";
-			$targetFilePath = $lessFilePathBase."/".$targetFileName;
-			$targetFileURI = str_replace($root, $rootUrl, $targetFilePath) . $extra;
+		$targetFileName = $filename.".lessc.css";
+		$targetFilePath = $lessFilePathBase."/".$targetFileName;
+		$targetFileURI = str_replace($root, $rootUrl, $targetFilePath) . $extra;
 
-			$lastModifiedTime = file_absolute_mtime($lessFilePath);
+		$lastModifiedTime = file_absolute_mtime($lessFilePath);
 
-			if(!file_exists($targetFilePath) || filemtime($targetFilePath) != $lastModifiedTime) {
-				try{
-				    $parser = new Less_Parser();
-					$parser->parseFile( $lessFilePath, str_replace( array("http:", "https:"), "", $lessFilePathBaseUrl) );
-					$css = $parser->getCss();
-					
-					$bytes = file_put_contents($targetFilePath, $css);
-					if($bytes === false) {
-						$compiled = false;
-					} else {
-						touch($targetFilePath, $lastModifiedTime);
-						$compiled = $targetFileURI;
-					}
-				} catch(Exception $e) {
+		if(!file_exists($targetFilePath) || filemtime($targetFilePath) != $lastModifiedTime) {
+			try{
+			    $parser = new Less_Parser();
+				$parser->parseFile( $lessFilePath, str_replace( array("http:", "https:"), "", $lessFilePathBaseUrl) );
+				$css = $parser->getCss();
+				
+				$bytes = file_put_contents($targetFilePath, $css);
+				if($bytes === false) {
 					$compiled = false;
-					if(file_exists($targetFilePath)) {
-						unlink($targetFilePath);
-					}
+				} else {
+					touch($targetFilePath, $lastModifiedTime);
+					$compiled = $targetFileURI;
 				}
-			} else {
-				$compiled = $targetFileURI;
+			} catch(Exception $e) {
+				$compiled = false;
+				if(file_exists($targetFilePath)) {
+					unlink($targetFilePath);
+				}
 			}
+		} else {
+			$compiled = $targetFileURI;
 		}
 
 		if($compiled !== false) {
-			$tag = str_replace($url, $compiled, $tag);
-		} else {
-			$tag = str_replace(array("rel='stylesheet'", 'rel="stylesheet"'), "rel='stylesheet/less'", $tag);
-			add_action( "wp_head", "SLESS_add_script", 100);
-		}		
+			$url = $compiled;
+		}
+	}
+	return $url;
+});
+
+add_filter("style_loader_tag", function($tag){
+	if(strpos($tag, ".less") !== false && strpos($tag, ".lessc") === false) {
+		$tag = str_replace(array("rel='stylesheet'", 'rel="stylesheet"'), "rel='stylesheet/less'", $tag);
+		add_action( "wp_head", "SLESS_add_script", 100);
 	}
 	return $tag;
 });
