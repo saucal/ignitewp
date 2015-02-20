@@ -1,51 +1,4 @@
 <?php
-if(!function_exists("wp_dropdown_posts")){
-	function wp_dropdown_posts( $args = '' ) {
-		$defaults = array(
-			'depth' => 0, 'child_of' => 0,
-			'selected' => 0, 'echo' => 1,
-			'name' => 'page_id', 'id' => '',
-			'show_option_none' => '', 'show_option_no_change' => '',
-			'option_none_value' => '',
-			'class' => ''
-		);
-
-		$r = wp_parse_args( $args, $defaults );
-
-		$pages = get_pages( $r );
-		
-		$output = '';
-		// Back-compat with old system where both id and name were based on $name argument
-		if ( empty( $r['id'] ) ) {
-			$r['id'] = $r['name'];
-		}
-
-		if ( ! empty( $pages ) ) {
-			$output = "<select name='" . esc_attr( $r['name'] ) . "' id='" . esc_attr( $r['id'] ) . "'" . (!empty($r['class']) ? " class='" . esc_attr( $r['class'] ) . "'" : "") . ">\n";
-			if ( $r['show_option_none'] ) {
-				$output .= "\t<option value=\"" . esc_attr( $r['option_none_value'] ) . '">' . $r['show_option_none'] . "</option>\n";
-			}
-			$output .= walk_page_dropdown_tree( $pages, $r['depth'], $r );
-			$output .= "</select>\n";
-		}
-
-		/**
-		 * Filter the HTML output of a list of pages as a drop down.
-		 *
-		 * @since 2.1.0
-		 *
-		 * @param string $output HTML output for drop down list of pages.
-		 */
-		$html = apply_filters( 'wp_dropdown_posts', $output );
-
-		if ( $r['echo'] ) {
-			echo $html;
-		}
-		return $html;
-	}
-}
-
-
 if(!class_exists("SaucalCPT")){
 	Class SaucalCPT {
 		var $defaults;
@@ -232,150 +185,183 @@ if(!class_exists("SaucalCMB")){
 				"template" => $template
 			);
 
-			if(is_array($metaboxes)){
+			if(is_array($metaboxes)) {
 				$this->opts = array_merge($this->defaults, $metaboxes);
 			}
 			extract($this->opts);
-			add_action("add_meta_boxes", array($this, "register_meta_boxes"));
-			add_action('save_post', array( $this, 'save_meta_box' ) );
-		}
-		function register_meta_boxes(){
-			//global $wp_meta_boxes;
-			//var_export($wp_meta_boxes);
-			//exit;
-			global $post;
-
-			$render = true;
-			if($post->post_type != $this->opts["slug"]){
-				$render = false;
-			}
-
-			if($this->opts["template"] !== false && is_string($this->opts["template"])){
-				$template_file = get_post_meta($post->ID,'_wp_page_template',TRUE);
-				if($this->opts["template"].".php" != $template_file && $this->opts["template"] != $template_file){
-					$render = false;
+			if(function_exists("register_field_group"))	{
+				$parsed_meta_boxes = $this->parse_meta_boxes_for_acf();
+				foreach($parsed_meta_boxes as $box){
+					register_field_group($box);
 				}
+			} else {
+				add_action("admin_notices", function() {
+				    ?>
+				    <div class="error">
+				        <p><?php echo "You're using meta fields, but you don't have Advanced Custom Fields Installed. Please install it for this part to work."; ?></p>
+				    </div>
+				    <?php
+				});
 			}
+		}
 
-			if(!$render)
-				return;
+		private function parse_fields_recursive($orig_fields, $path) {
+			$fields = array();
+			foreach($orig_fields as $meta_key => $field) {
 
-			$meta_boxes = $this->opts["meta_boxes"];
-			foreach($meta_boxes as $id => $meta_box) {
-				$mbDefaults = array(
-					"position" => "side",
-		            "title" => "Meta Box",
-		            "fields" => array(),
-		            "priority" => "default"
+				$thisFieldKey = $path."_".$meta_key;
+				$newField = array(
+					'key' => $thisFieldKey,
+					'label' => $field["name"],
+					'name' => $meta_key,
+					'type' => $field["type"],
 				);
 
-				$meta_box = array_merge($mbDefaults, $meta_box);
-				add_meta_box( "meta_box_".$id, $meta_box["title"], array($this, "render_meta_box"), $this->opts["slug"], $meta_box["position"], $meta_box["priority"], array("meta_box_id" => "meta_box_".$id, "meta_box" => $meta_box) );
-			}
-			/*var_export($wp_meta_boxes);
-			exit;*/
-		}
-		function render_meta_box($post, $caller){
-			$metabox = $caller["args"]["meta_box"];
-			$metaboxID = $caller["args"]["meta_box_id"];
-			// Add an nonce field so we can check for it later.
-			wp_nonce_field( $metaboxID, $metaboxID.'[_wpnonce]' );
+				unset($field["name"]);
+				unset($field["type"]);
 
-			foreach($metabox["fields"] as $meta => $field){
-				$fldDefaults = array(
-					"name" => "Field",
-		            "type" => "text",
-				);
+				$defaults = array();
+				switch ($newField["type"]) {
+					case 'text':
+						$defaults = array(
+							'default_value' => '',
+							'placeholder' => '',
+							'prepend' => '',
+							'append' => '',
+							'formatting' => 'html',
+							'maxlength' => '',
+						);
+						break;
+					
+					case "textarea":
+					case "paragraph":
+						$newField["type"] = "textarea";
+						$defaults = array(
+							'default_value' => '',
+							'placeholder' => '',
+							'maxlength' => '',
+							'rows' => '',
+							'formatting' => 'br',
+						);
+						break;
 
-				$field = array_merge($fldDefaults, $field);
+					case "wysiwyg":
+						$defaults = array(
+							'default_value' => '',
+							'toolbar' => 'full',
+							'media_upload' => 'yes',
+						);
+						break;
 
-				// Use get_post_meta to retrieve an existing value from the database.
-				$value = get_post_meta( $post->ID, '_'.$meta, true );
+					case "image":
+						$defaults = array(
+							'save_format' => 'object',
+							'preview_size' => 'thumbnail',
+							'library' => 'all',
+						);
+						break;
 
-				$fieldId = $post->post_type.'_'.$meta;
-				// Display the form, using the current value.
-				echo '<p><label for="'.$fieldId.'">';
-				_e( $field["name"], 'myplugin_textdomain' );
-				echo '</label></p>';
-				echo "<p>";
-				if($field["type"] == "paragraph"){
-					echo '<textarea class="widefat" id="'.$fieldId.'" rows="5" name="'.$metaboxID.'['.$meta.']" value="' . esc_attr( $value ) . '" >'.$value.'</textarea>';
-	            } else if($field["type"] == "user_list") {
-	            	wp_dropdown_users(array(
-	            		"show_option_all" => " ",
-	            		"name" => $metaboxID.'['.$meta.']',
-	            		"class" => "widefat",
-	            		"id" => $fieldId,
-	            		"selected" => empty($value) ? "0" : $value,
-	            	));
-	            } else if($field["type"] == "post_list") {
-	            	if(!isset($field["post_type"]))
-	            		$field["post_type"] = "post";
+					case "file":
+						$defaults = array(
+							'save_format' => 'object',
+							'library' => 'all',
+						);
+						break;
 
-	            	if(isset($field["filter"]))
-	            		add_filter("list_pages", $field["filter"], 10, 2);
-	            	wp_dropdown_posts(array(
-	            		"post_type" => $field["post_type"],
-	            		"show_option_none" => " ",
-	            		"name" => $metaboxID.'['.$meta.']',
-	            		"class" => "widefat",
-	            		"id" => $fieldId,
-	            		"selected" => empty($value) ? "0" : $value,
-	            	));
-	            	if(isset($field["filter"]))
-	            		remove_filter("list_pages", $field["filter"], 10);
-	            } else {
-					echo '<input class="widefat" type="text" id="'.$fieldId.'" name="'.$metaboxID.'['.$meta.']"';
-						echo ' value="' . esc_attr( $value ) . '" />';
-	            }
-				echo "</p>";
-			}
-		}
+					case "post_list":
+					case "post_object":
+						$field["type"] = "post_object";
+						$defaults = array(
+							'post_type' => array('all'),
+							'taxonomy' => array('all'),
+							'allow_null' => 0,
+							'multiple' => 0,
+						);
+						if(!empty($field["post_type"]) && !is_array($field["post_type"])){
+							$defaults["post_type"] = array($field["post_type"]);
+							unset($field["post_type"]);
+						}
+						break;
 
-		function save_meta_box($post_id){
-			// If this is an autosave, our form has not been submitted,
-	                //     so we don't want to do anything.
-			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
-				return $post_id;
+					case "user":
+					case "user_list":
+						$field["type"] = "user";
+						$defaults = array(
+							'role' => array (
+								0 => 'all',
+							),
+							'field_type' => 'select',
+							'allow_null' => 0,
+						);
+						break;
 
-			/*
-			 * We need to verify this came from the our screen and with proper authorization,
-			 * because save_post can be triggered at other times.
-			 */
+					case "select":
+						$defaults = array(
+							'choices' => array(),
+							'default_value' => '',
+							'allow_null' => 0,
+							'multiple' => 0,
+						);
+						break;
 
-			$meta_boxes = $this->opts["meta_boxes"];
-			foreach($meta_boxes as $id => $meta_box) {
-				$metaboxID = "meta_box_".$id;
-				if ( isset( $_POST[$metaboxID] ) ) $thisPost = $_POST[$metaboxID];
-
-				
-				// Check if our nonce is set.
-				if ( ! isset( $thisPost["_wpnonce"] ) )
-					continue;
-
-				$nonce = $thisPost["_wpnonce"];
-
-				// Verify that the nonce is valid.
-				if ( ! wp_verify_nonce( $nonce, $metaboxID ) )
-					continue;
-
-				if ( ! current_user_can( 'edit_post', $post_id ) )
-					continue;
-
-				foreach($meta_box["fields"] as $meta => $field){
-					//var_dump($meta);
-					if(isset($thisPost[$meta])){
-						$newVal = $thisPost[$meta];
-						update_post_meta( $post_id, '_'.$meta, $newVal );
-						//var_dump($post_id, '_'.$meta, $newVal);
-					} 
+					default:
+						# code...
+						break;
 				}
-				//var_dump($thisPost);
-				//exit;
 
+				$newField = array_merge($newField, $defaults);
+				$newField = array_merge($newField, $field);
 				
+				$fields[] = $newField;
 			}
-			return $post_id;
+			return $fields;
+		}
+
+		function parse_meta_boxes_for_acf() {
+			$boxes = array();
+			foreach($this->opts["meta_boxes"] as $box_id => $box){
+				$display_condition = array(
+					array(
+						array(
+							'param' => 'post_type',
+							'operator' => '==',
+							'value' => $this->opts["slug"],
+						)
+					)
+				);
+				if($this->opts["template"] !== false && is_string($this->opts["template"])) {
+					$display_condition[0][] = array(
+						'param' => 'page_template',
+						'operator' => '==',
+						'value' => $this->opts["template"],
+					);
+				}
+
+				foreach($display_condition as $group_no => $conds){
+					foreach($conds as $order_no => $cond) {
+						$display_condition[$group_no][$order_no] = array_merge($display_condition[$group_no][$order_no], array(
+							"order_no" => $order_no,
+							"group_no" => $group_no,
+						));
+					}
+				}
+
+				$thisBoxId = $this->opts["slug"]."_".$box_id;
+
+				$metaData = array(
+					'id' => $thisBoxId,
+					'title' => $box["title"],
+					'fields' => $this->parse_fields_recursive($box["fields"], $thisBoxId),
+					'location' => $display_condition,
+					'options' => array(
+						'position' => $box["position"],
+						'layout' => 'default',
+						'hide_on_screen' => array(),
+					),
+				);
+				$boxes[] = $metaData;
+			}
+			return $boxes;
 		}
 	}
 }
