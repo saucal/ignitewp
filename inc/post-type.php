@@ -319,7 +319,13 @@ if(!class_exists("SaucalCMB")){
 
 		function parse_meta_boxes_for_acf() {
 			$boxes = array();
+			$defaults = array(
+				"title" => "Meta Box",
+				"fields" => array(),
+				"position" => "normal",
+			);
 			foreach($this->opts["meta_boxes"] as $box_id => $box){
+				$box = array_merge($defaults, $box);
 				$display_condition = array(
 					array(
 						array(
