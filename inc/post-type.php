@@ -194,7 +194,7 @@ if(!class_exists("SaucalCMB")){
 				foreach($parsed_meta_boxes as $box){
 					register_field_group($box);
 				}
-			} else {
+			} else if(!empty($this->opts["meta_boxes"])) {
 				add_action("admin_notices", function() {
 				    ?>
 				    <div class="error">
