@@ -357,7 +357,7 @@ if(!class_exists("SaucalCMB")){
 				$metaData = array(
 					'id' => $thisBoxId,
 					'title' => $box["title"],
-					'fields' => $this->parse_fields_recursive($box["fields"], $thisBoxId),
+					'fields' => $this->parse_fields_recursive($box["fields"], "field_".$thisBoxId),
 					'location' => $display_condition,
 					'options' => array(
 						'position' => $box["position"],
