@@ -304,6 +304,15 @@ if(!class_exists("SaucalCMB")){
 						);
 						break;
 
+					case "true_false":
+					case "switch":
+						$field["type"] = "true_false";
+						$defaults = array(
+							'message' => '',
+							'default_value' => 0,
+						);
+						break;
+
 					default:
 						# code...
 						break;
