@@ -751,7 +751,7 @@
 			var thisIsThat = $(thisIsIt);
 			var callbacks = item.callbacks;
 
-			if(thisIsThat.css("display") !== "none"){
+			if(thisIsIt === window || thisIsThat.css("display") !== "none"){
 				var widthn = thisIsThat.width(),
 					heightn = thisIsThat.height();
 
