@@ -32,6 +32,29 @@ add_action( "wp_enqueue_scripts", function(){
         "admin_url" => admin_url(),
         "login_url" => wp_login_url()
     ));
+    wp_localize_script( SAUCAL_TPL_ID."-ajax-api", "ajax_api_config", apply_filters("ajax_api_config", array(
+        "contentSelector" => "#content",
+        "menuSelector" => array(
+            "menu" => "#header ul.menu",
+            "item" => "#header ul.menu li.menu-item"
+        ),
+        "loader" => array(
+            "show" => null,
+            "hide" => null
+        ),
+        "beforeBuffer" => "function(content){
+            return true;
+        }",
+        "changeBufferData" => "function(bufferData, content, ajaxBody){
+            return bufferData;
+        }",
+        "callbacks" => array(
+            "prevHideOldContent" => "function(){}",
+            "afterShow" => "function(){}",
+            "prevShow" => "function(){}",
+            "afterInitShow" => "function(){}"
+        )
+    )));
     wp_enqueue_script( SAUCAL_TPL_ID."-ajax-api" );
 }, 100);
 ?>

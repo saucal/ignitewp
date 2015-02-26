@@ -180,8 +180,9 @@
 	    this.popped = ('state' in window.history && window.history.state !== null);
 	    this.popped = false;
 	    this.initialURL = location.href;
-	    this.config = {
-			contentSelector: "#content",
+
+	    this.config = $.extend(true, {}, {
+	    	contentSelector: "#content",
 			menuSelector: {
 				menu: "ul.menu",
 				item: "li.menu-item"
@@ -202,7 +203,29 @@
 				prevShow: function(){},
 				afterInitShow: function(){}
 			}
-		};
+		});
+
+	    var recursiveApiEval = function(items) {
+	    	$.each(items, function(i, item){
+	    		if(typeof item == "string"){
+	    			if(item.indexOf("function") == 0) {
+	    				try {
+	    					item = eval("("+item+")");
+	    				} catch(e) {
+	    					console.error(e);
+	    				}
+	    			}
+	    			items[i] = item;
+	    		}
+	    		if(typeof item == "object" && item !== null)
+	    			items[i] = recursiveApiEval(item);
+	    	})
+	    	return items;
+	    }
+
+	    ajax_api_config = recursiveApiEval(ajax_api_config);
+
+	    this.config = $.extend(true, this.config, ajax_api_config);
 	}
 	SAUCAL_AJAX_API.prototype.setup = function(_config){
 		this.config = $.extend(true, this.config, _config);
