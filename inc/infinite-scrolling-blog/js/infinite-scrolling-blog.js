@@ -152,7 +152,6 @@
 	}
 
 	var getPost = function(id, cb){
-		console.error("getting-post");
 		ajaxGetJSON('get_post_by_id', 'post_id='+ id , function(){
 			var json = arguments[1];
 			if(typeof json === "object") {
