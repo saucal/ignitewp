@@ -248,10 +248,10 @@
     SAUCAL_AJAX_API.prototype.init = function(){
     	var content = $(this.config.contentSelector);
     	contentBuffer.add(content);
-		content.trigger( "showingPage" );
-    	content.trigger("contentReady");
+		content.trigger("showingPage", [content]);
+    	content.trigger("contentReady", [content]);
 		content.data("contentAlreadyLoaded", true);
-		content.trigger("contentLoad");
+		content.trigger("contentLoad", [content]);
     }
     SAUCAL_AJAX_API.prototype.markLinks = function(href){
 		$(ajaxAPI.config.menuSelector.menu+" "+ajaxAPI.config.menuSelector.item+" a").each(function(){
@@ -398,18 +398,18 @@
 			newContent.hide().insertAfter($(this));
 
 			var e = jQuery.Event( "showingPage" );
-			newContent.trigger( e );
+			newContent.trigger( e, [newContent] );
 			if(!e.isDefaultPrevented()){
 				document.title = newContent.data("title");
 			}
 
 			if(!newContent.data("contentAlreadyLoaded")){
-				newContent.trigger("contentReady");
+				newContent.trigger("contentReady", [newContent]);
 				newContent.data("contentAlreadyLoaded", true);
 			}
 			$(this).detach();
 			ajaxAPI.config.callbacks.prevShow.call(newContent);
-			newContent.trigger("contentLoad").fadeIn(200, function(){
+			newContent.trigger("contentLoad", [newContent]).fadeIn(200, function(){
 				ajaxAPI.config.callbacks.afterShow.call(newContent);
 			});
 			ajaxAPI.config.callbacks.afterInitShow.call(newContent);
