@@ -11,10 +11,12 @@ class Saucal_Lazy_Load_Patcher {
 	function init(){
 		wp_register_script( "lazy-load-xt", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.min.js", array("jquery"), "1.0.5", false );
 		wp_register_style( "lazy-load-xt-fadein", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.fadein.min.css", array(), "1.0.5" );
+		wp_register_script( "saucal-lazy-load-xt-integration", SAUCAL_TPL_LIB_URL(__FILE__)."/js/lazyloadxt-integration.js", array("jquery"), "1.0", false );
 		ob_start(array($this, "catch_output"));
 	}
 	function wp_enqueue_scripts(){
 		wp_enqueue_script("lazy-load-xt");
+		wp_enqueue_script("saucal-lazy-load-xt-integration");
 		wp_enqueue_style("lazy-load-xt-fadein");	
 	}
 	function catch_output($ret){
