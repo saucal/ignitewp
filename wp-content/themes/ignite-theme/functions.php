@@ -19,9 +19,17 @@ add_action( "wp_enqueue_scripts", function(){
 	wp_enqueue_style( SAUCAL_TPL_ID."-theme-main" );
 });	
 
-// You should call the add_ignite_support function here to load the modules you want
-
-
+if(function_exists("add_theme_support")) {
+	// You should call the add_ignite_support function here to load the modules you want
+} else {
+	add_action("admin_notices", function() {
+	    ?>
+	    <div class="error">
+	        <p><?php echo "This theme will not work as expected unless you install the Ignite WP Framework Plugin."; ?></p>
+	    </div>
+	    <?php
+	});
+}
 
 // After that, you should code as usual, making use of the modules at will.
 

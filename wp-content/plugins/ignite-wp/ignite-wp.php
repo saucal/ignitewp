@@ -1,6 +1,6 @@
 <?php 
 /*
-Plugin Name: IgniteWP
+Plugin Name: Ignite WP Framework
 Plugin URI: https://github.com/saucal/ignitewp
 Description: IgniteWP - A WordPress Theme Framework
 Version: 1.0
