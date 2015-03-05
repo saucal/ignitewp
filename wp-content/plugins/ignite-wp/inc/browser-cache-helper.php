@@ -2,9 +2,6 @@
 function saucal_clean_file_version($src){
 	if(strpos($src, SAUCAL_TPL_BASEURL) === false) //this ignores anything outside ignite
 		return $src;
-
-	if(strpos($src, SAUCAL_TPL_BASEURL."/inc") === 0) //this condition ignores module scripts, as they are considered mostly static.
-		return $src;
 	
 	if(strpos($src, "?") !== false){
 		list( $clean, $query ) = explode("?", $src, 2);

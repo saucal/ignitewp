@@ -1,14 +1,5 @@
 <?php 
 define("SAUCAL_TPL_ID", "saucal");
-define("SAUCAL_TPL_BASEURL", get_stylesheet_directory_uri());
-define("SAUCAL_TPL_BASE", get_stylesheet_directory());
-define("SAUCAL_TPL_INCL", SAUCAL_TPL_BASE."/inc/");
-
-//Init theme libraries
-require_once(SAUCAL_TPL_INCL."core.php");
-
-//Disable Admin Bar
-show_admin_bar( false ); 
 
 //Add theme support
 add_theme_support( 'post-thumbnails' );
@@ -19,10 +10,7 @@ register_nav_menus( array(
 ));
 
 add_action("init", function(){
-	wp_register_script( "saucal-jquery-extension", SAUCAL_TPL_BASEURL."/js/inc/saucal-jquery-extension.js", array("jquery"), "3.0", false );
-
 	wp_register_script( SAUCAL_TPL_ID."-theme-main", SAUCAL_TPL_BASEURL."/js/main.js", array("saucal-jquery-extension"), "1.0", false );
-
 	wp_register_style( SAUCAL_TPL_ID."-theme-main", SAUCAL_TPL_BASEURL."/css/main.less", array(), "1.0" );
 });
 
@@ -31,7 +19,11 @@ add_action( "wp_enqueue_scripts", function(){
 	wp_enqueue_style( SAUCAL_TPL_ID."-theme-main" );
 });	
 
+// You should call the add_ignite_support function here to load the modules you want
 
+
+
+// After that, you should code as usual, making use of the modules at will.
 
 
 ?>
