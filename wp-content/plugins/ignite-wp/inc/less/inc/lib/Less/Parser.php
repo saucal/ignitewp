@@ -303,9 +303,25 @@ class Less_Parser{
 	 * @return Less_Tree_Ruleset|Less_Parser
 	 */
 	public function parseFile( $filename, $uri_root = '', $returnRoot = false){
-
+		$readFileName = $filename;
 		if( !file_exists($filename) ){
-			$this->Error(sprintf('File `%s` not found.', $filename));
+			$basename = basename($filename);
+			if($uri_root == $filename) {
+				$filePossibleURL = rtrim($this->env->currentFileInfo["uri_root"], "/")."/".$basename;
+			} else {
+				$filePossibleURL = rtrim($uri_root, "/")."/".$basename;
+			}
+
+			if(strpos($filePossibleURL, "//") === 0) {
+				$filePossibleURL = "http:".$filePossibleURL;
+			}
+			$cont = @file_get_contents($filePossibleURL);
+			if(empty($cont)) {
+				$this->Error(sprintf('File `%s` not found.', $filename));
+			} else {
+				$readFileName = tempnam(sys_get_temp_dir(), 'Lessc');
+				file_put_contents($readFileName, $cont);
+			}
 		}
 
 
@@ -324,15 +340,19 @@ class Less_Parser{
 		self::AddParsedFile($filename);
 
 		if( $returnRoot ){
-			$rules = $this->GetRules( $filename );
+			$rules = $this->GetRules( $readFileName );
 			$return = new Less_Tree_Ruleset(array(), $rules );
 		}else{
-			$this->_parse( $filename );
+			$this->_parse( $readFileName );
 			$return = $this;
 		}
 
 		if( $previousFileInfo ){
 			$this->env->currentFileInfo = $previousFileInfo;
+		}
+
+		if($readFileName !== $filename) {
+			unlink($readFileName);
 		}
 
 		return $return;
