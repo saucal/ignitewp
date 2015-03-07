@@ -22,11 +22,21 @@ function file_absolute_mtime($lessFilePath) {
 		if(!path_is_absolute($fileToInclude)) {
 			$thisFilePath = $lessFilePathBase."/".$fileToInclude;
 		}
-		if(!file_exists($thisFilePath))
-			continue;
 
 		if(substr($thisFilePath, -4) == ".css")
 			continue;
+
+		$time = apply_filters("ignite_less_file_date", 0, $thisFilePath);
+
+		if($time){
+			$filesToBeIncluded[$thisFilePath] = $time;
+			continue;
+		}
+
+		if(!file_exists($thisFilePath)){
+			$filesToBeIncluded[$thisFilePath] = time() + 60; //set this to the future so we force recompiling
+			continue;
+		}
 
 		$thisFilePath = realpath($thisFilePath);
 
