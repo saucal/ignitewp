@@ -7,7 +7,7 @@ function SLESS_add_script(){
 		};
 	</script>
 	<!--[if lte IE 8]>         <script src="<?= SAUCAL_TPL_LIB_URL(__FILE__) ?>/js/less-1.3.3.min.js"></script> <![endif]-->
-	<!--[if gt IE 8]><!--> <script src="<?= SAUCAL_TPL_LIB_URL(__FILE__) ?>/js/less-2.0.0.min.js"></script> <!--<![endif]-->
+	<!--[if gt IE 8]><!--> <script src="<?= SAUCAL_TPL_LIB_URL(__FILE__) ?>/js/less-2.3.1.min.js"></script> <!--<![endif]-->
 	<?php
 }
 
