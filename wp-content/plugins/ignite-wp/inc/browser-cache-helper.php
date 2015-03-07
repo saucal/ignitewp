@@ -1,17 +1,24 @@
 <?php 
 function saucal_clean_file_version($src){
-	if(strpos($src, SAUCAL_TPL_BASEURL) === false) //this ignores anything outside ignite
-		return $src;
-	
-	if(strpos($src, "?") !== false){
-		list( $clean, $query ) = explode("?", $src, 2);
-	} else {
-		$clean = $src;
-	}
+	$ignorePaths = apply_filters("ignite_browser_cache_helper_paths", array(SAUCAL_TPL_BASEURL));
 
-	$path = str_replace(SAUCAL_TPL_BASEURL, SAUCAL_TPL_BASE, $clean);
-	if(file_exists($path)) {
-		$src = add_query_arg(array("ver" => date("Ymd-Hi", filemtime($path))), $src);
+	foreach($ignorePaths as $path) {
+		if(strpos($src, $path) === false) //this ignores anything outside ignite
+			continue;
+		
+		if(strpos($src, "?") !== false){
+			list( $clean, $query ) = explode("?", $src, 2);
+		} else {
+			$clean = $src;
+		}
+
+		$root = rtrim(ABSPATH, "/\\");
+		$rootUrl = home_url();
+
+		$path = str_replace($rootUrl, $root, $clean);
+		if(file_exists($path)) {
+			$src = add_query_arg(array("ver" => date("Ymd-Hi", filemtime($path))), $src);
+		}
 	}
 	return $src;
 }
