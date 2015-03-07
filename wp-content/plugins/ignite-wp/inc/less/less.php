@@ -92,8 +92,8 @@ add_filter("style_loader_src", function($url){
 			$extra .= "#".$data["fragment"];		
 
 
-		$root = get_theme_root();
-		$rootUrl = get_theme_root_uri();
+		$root = rtrim(ABSPATH, "/\\");
+		$rootUrl = home_url();
 
 		$lessFilePath = str_replace($rootUrl, $root, $cleanUrl);
 		$lessFilePathBaseUrl = dirname($cleanUrl);
@@ -104,7 +104,8 @@ add_filter("style_loader_src", function($url){
 		$filename = implode(".", $filename);
 
 		$targetFileName = $filename.".lessc.css";
-		$targetFilePath = $lessFilePathBase."/".$targetFileName;
+		$targetFileDirectory = apply_filters("ignite_less_compile_folder", $lessFilePathBase."/");
+		$targetFilePath = $targetFileDirectory.$targetFileName;
 		$targetFileURI = str_replace($root, $rootUrl, $targetFilePath) . $extra;
 
 		$lastModifiedTime = file_absolute_mtime($lessFilePath);
