@@ -19,7 +19,7 @@ add_action( "wp_enqueue_scripts", function(){
 	wp_enqueue_style( SAUCAL_TPL_ID."-theme-main" );
 });	
 
-if(function_exists("add_theme_support")) {
+if(function_exists("add_ignite_support")) {
 	// You should call the add_ignite_support function here to load the modules you want
 } else {
 	add_action("admin_notices", function() {
