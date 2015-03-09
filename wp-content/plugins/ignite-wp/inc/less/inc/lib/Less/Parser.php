@@ -351,7 +351,7 @@ class Less_Parser{
 			$this->env->currentFileInfo = $previousFileInfo;
 		}
 
-		if($readFileName !== $filename) {
+		if(realpath($readFileName) !== realpath($filename)) {
 			unlink($readFileName);
 		}
 
