@@ -1,6 +1,8 @@
 <?php 
 add_action("init", function(){
     global $wp_filter;
+    global $withcomments;
+    $withcomments = true;
     //var_dump($wp_filter["comments_template"]);
     if(function_exists("dsq_comments_template")){
         remove_filter('comments_template', 'dsq_comments_template');
@@ -45,7 +47,7 @@ function mjt_comments_template($value) {
     global $post;
     global $comments;
 
-    if ( !( is_singular() && ( have_comments() || 'open' == $post->comment_status ) ) ) {
+    if ( !( 'open' == $post->comment_status ) ) {
         return;
     }
 

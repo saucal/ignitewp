@@ -5,7 +5,7 @@ if (DISQUS_DEBUG) {
 ?>
 
 <div id="disqus_thread_post_<?php the_ID(); ?>" class="disqus_thread" data-thread-id="post_<?php the_ID(); ?>">
-    <?php if (!get_option('disqus_disable_ssr') && have_comments()): ?>
+    <?php if (!get_option('disqus_disable_ssr') && have_comments() && is_singular()): ?>
         <?php
         // if (is_file(TEMPLATEPATH . '/comments.php')) {
         //     include(TEMPLATEPATH . '/comments.php');
