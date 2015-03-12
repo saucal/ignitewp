@@ -42,6 +42,8 @@
 	}
 	window.loadComments = function(thread_ID){
 
+        var def = $.Deferred();
+
         var thread = findThreadElement(thread_ID).prop("id", "disqus_thread");
 
         $(".disqus_thread").not(thread).each(function(){
@@ -76,8 +78,8 @@
             }
             this.callbacks.onReady.push(function(){
             	$(document.getElementById("disqus_thread")).trigger("disqus-rendered");
+                def.resolve();
             })
-	        console.log(this.callbacks);
             if(config.sso){
                 this.sso = config.sso;
             }
@@ -93,6 +95,7 @@
               config: disqusInit
             });
         }
+        return def.promise();
     }
     window.unloadComments = function(thread_ID){
         var thread = $(".disqus_thread").filter(function(){
