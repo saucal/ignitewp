@@ -41,7 +41,9 @@ if (DISQUS_DEBUG) {
     <?php endif; ?>
 </div>
 
-<!--<div class="lazy-load-disqus"><a href="#" data-thread-id="post_<?php the_ID(); ?>">Load Comments</a></div>-->
+<?php if(apply_filters("ignite-disqus-lazy", false)): ?>
+<div class="lazy-load-disqus"><a href="#" data-thread-id="post_<?php the_ID(); ?>">Load Comments</a></div>
+<?php endif; ?>
 
 <script type="text/javascript">
 /* <![CDATA[ */
