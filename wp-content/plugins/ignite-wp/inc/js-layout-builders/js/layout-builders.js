@@ -1,13 +1,17 @@
 (function($){
-	window.newElem = function(tag, _class, opts){
+	window.newElem = function(tag, _class, _opts){
 		if(typeof _class == "object"){
-			opts = _class;
+			_opts = _class;
 			_class = undefined;
 		}
-		if(typeof _class == "undefined") _class = "";
-		opts = $.extend(true, {
-			"class": _class
-		}, opts);
+		var def = {};
+		if(typeof _class != "undefined") {
+			def = {
+				"class": _class
+			};
+		}
+		var opts = $.extend(true, {}, def);
+		opts = $.extend(true, opts, _opts);
 		return $("<"+tag+"/>", opts);
 	}
 
