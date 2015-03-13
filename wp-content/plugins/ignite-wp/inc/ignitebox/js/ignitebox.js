@@ -4,6 +4,8 @@
 	var finalInfo = {};
 	var fetchData = _.debounce(_fetchData, 100); 
 
+	var cached_width, cached_height;
+
 	$.ignitebox = {
 		elementsAttached: ["caption", "prev", "next"],
 		buttonContent: {
@@ -293,7 +295,7 @@
 
 
 		// resizing checks
-		var checkSize = _.debounce(function(){
+		var checkSize = _.throttle(function(){
 			var sizeInt = 0;
 			if(window.matchMedia) {
 				if(matchMedia('(min-width: 480px)').matches || matchMedia('(min-resolution: 260dpi)').matches) {
@@ -336,9 +338,12 @@
 				}
 			})
 			gallery.find(".ignitebox-comment-area-inner-wrap, .ignitebox-comment-area-inner-wrap, .ignitebox-comment-area").css("max-width", gallery.width());
-		}, 10)
 
-		$(window).on("resize.ignitebox", checkSize);
+			cached_width = $(window).width();
+			cached_height = $(window).height();
+		}, Math.floor(1000 / 60)); //lock this at 60fps
+		
+		$(window).off("resize.ignitebox").on("resize.ignitebox", checkSize);
 		checkSize();
 
 		return gallery;
@@ -466,6 +471,7 @@
 		gallery.one('transitionend webkitTransitionEnd', function(e){
 			gallery.remove();
 			$("body").removeClass('ignitebox-open');
+			$(window).off("resize.ignitebox");
 		})
 		gallery.css("opacity", 0);
 	}
