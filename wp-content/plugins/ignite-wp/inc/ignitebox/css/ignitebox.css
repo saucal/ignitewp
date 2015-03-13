@@ -222,6 +222,17 @@
 	margin-left: 0px;
 	opacity: 0;
 }
+.ignitebox-action-close-comments {
+	left: -1.28571429em;
+	opacity: 0;
+	position: relative;
+	display: inline-block;
+	transition: opacity 1s, left 1s;
+}
+#ignitebox.comments-open .ignitebox-action-close-comments {
+	left: 0;
+	opacity: 1;
+}
 
 body.ignitebox-open {
 	overflow: hidden;
