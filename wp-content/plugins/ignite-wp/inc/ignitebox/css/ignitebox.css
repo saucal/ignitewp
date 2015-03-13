@@ -223,8 +223,7 @@
 	opacity: 0;
 }
 
-html.ignitebox-open,
-html.ignitebox-open body {
+body.ignitebox-open {
 	overflow: hidden;
 }
 

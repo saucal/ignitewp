@@ -161,7 +161,7 @@
 				gallDisplay.css("opacity", "")
 			})
 			gallDisplay.css("opacity", 1);
-			$("html").addClass('ignitebox-open')
+			$("body").addClass('ignitebox-open')
 		}
 	}
 
@@ -412,7 +412,7 @@
 		var gallery = $(e.delegateTarget);
 		gallery.one('transitionend webkitTransitionEnd', function(e){
 			gallery.remove();
-			$("html").removeClass('ignitebox-open');
+			$("body").removeClass('ignitebox-open');
 		})
 		gallery.css("opacity", 0);
 	}
