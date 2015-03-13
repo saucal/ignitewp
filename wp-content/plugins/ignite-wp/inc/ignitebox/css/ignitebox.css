@@ -2,8 +2,9 @@
 	position: fixed;
 	top: 0;
 	left: 0;
-	width: 100%;
-	height: 100%;
+	bottom: 0;
+	right: 0;
+	-webkit-overflow-scrolling: touch;
 	background: rgba(1, 27, 48, 0.95);
 	transition: opacity 0.5s;
 }
@@ -125,6 +126,7 @@
 	left: 0px;
 	height: 100%;
 	width: 100%;
+	z-index: 10;
 }
 
 .ignitebox-image-bars .ignitebox-action-prev,
@@ -159,6 +161,7 @@
 
 	overflow: hidden;
 	transition: width 1s, margin-left 1s, opacity 1s;
+	z-index: 40;
 }
 
 .ignitebox-comment-area {
@@ -181,6 +184,7 @@
 	left: 0;
 	right: 0;
 	background: white;
+	z-index: 20;
 }
 .ignitebox-comment-container {
 	padding: 30px 20px;
@@ -208,6 +212,9 @@
 	color: white;
 	padding: 10px 20px;
 	text-align: center;
+}
+.ignitebox-area-caption {
+	white-space: normal;
 }
 
 #ignitebox.comments-open .ignitebox-action-comments {
