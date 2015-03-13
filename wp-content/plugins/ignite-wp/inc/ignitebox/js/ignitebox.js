@@ -248,7 +248,7 @@
 		var prevImgs = imagesCont.find(".ignitebox-image");
 
 		if(prevImgs.length > 0){
-			prevImgs.fadeOut(200).promise().done(function(){
+			prevImgs.fadeOut(500).promise().done(function(){
 				prevImgs.remove();
 			});
 		}
@@ -381,7 +381,7 @@
 			thisImg.data("img-load-def", def);
 			var thisImgCont = thisImg.parents(".ignitebox-image-container").addClass('loading');
 			thisImg.one("load", function(){
-				thisImgCont.fadeIn(200);
+				thisImgCont.fadeIn(500);
 				thisImgCont.removeClass('loading');
 				def.resolve()
 			});
@@ -441,7 +441,7 @@
 
 		var captionArea = gallery.children(".ignitebox-area-caption");
 		var captionText = captionArea.children(".ignitebox-area-caption-text");
-		var duration = 200;
+		var duration = 500;
 		if(instantHide)
 			duration = 0;
 
@@ -460,7 +460,7 @@
 			captionText.html("");
 			if(newPic.caption.length > 0){
 				captionText.html(newPic.caption)
-				fadeObj.fadeIn(200);
+				fadeObj.fadeIn(400);
 			}
 		})
 	}
