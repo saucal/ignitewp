@@ -724,12 +724,13 @@
 			thisRef.checkResize();
 		});
 	}
-	$.onElementResizeClass.prototype.add = function(element, callback){
+	$.onElementResizeClass.prototype.add = function(element, callback, hard){
 		this.elemsToCheck.push({
 			element: element,
 			callbacks: [callback],
 			width: $(element).width(),
-			height: $(element).height()
+			height: $(element).height(),
+			hard: hard || false
 		})
 		if(typeof this.timer === "undefined") {
 			this.init();
@@ -741,12 +742,15 @@
 		clearTimeout(thisRef.timer);
 		thisRef.timer = undefined;
 		thisRef.timer = setTimeout(function(){
-			thisRef.checkResize();
+			thisRef.checkResize(true);
 		}, time);
 	}
-	$.onElementResizeClass.prototype.checkResize = function() {
+	$.onElementResizeClass.prototype.checkResize = function(hard) {
 		var thisRef = this;
 		$.each(this.elemsToCheck, function(i, item){
+			if(hard && !item.hard)
+				return;
+			
 			var thisIsIt = item.element;
 			var thisIsThat = $(thisIsIt);
 			var callbacks = item.callbacks;
