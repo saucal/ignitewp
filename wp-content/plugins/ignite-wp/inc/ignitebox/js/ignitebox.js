@@ -126,7 +126,7 @@
 
 					$.each(elems, function(i, data){
 						var def = data.link.data("ingitebox-init-def");
-						def[action+"With"](data.link, [attData]);
+						def[action+"With"](data.link, [$.extend(true, {}, attData)]);
 					});
 				});
 			}
