@@ -5,8 +5,14 @@
 	width: 100%;
 	height: 100%;
 	background: rgba(1, 27, 48, 0.95);
+	transition: opacity 0.5s;
+}
 
-    transition: opacity 0.2s;
+#ignitebox, #ignitebox * {
+	/* turn on GPU */
+	/*-webkit-transform: translate3d(0, 0, 0);
+	transform: translate3d(0, 0, 0);
+	-webkit-backface-visibility: hidden;*/
 }
 #ignitebox:before {
 	opacity: 0;
@@ -72,10 +78,7 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	transition: left 0.5s;
-
-	/* turn on GPU */
-	-webkit-transform: translate3d(0, 0, 0);
+	transition: left 0.5s, transform 0.5s;
 	transform: translate3d(0, 0, 0);
 }
 #ignitebox.swiping #ignitebox-images {
@@ -88,10 +91,6 @@
 	vertical-align: top;
 	text-align: center;
 	padding: 50px 100px;
-
-	/* turn on GPU */
-	-webkit-transform: translate3d(0, 0, 0);
-	transform: translate3d(0, 0, 0);
 }
 .ignitebox-image:before {
 	content: "";
@@ -108,10 +107,6 @@
 	padding: 10px;
 	margin-bottom: 50px;
 	position: relative;
-
-	/* turn on GPU */
-	-webkit-transform: translate3d(0, 0, 0);
-	transform: translate3d(0, 0, 0);
 }
 
 .ignitebox-image-container > img {

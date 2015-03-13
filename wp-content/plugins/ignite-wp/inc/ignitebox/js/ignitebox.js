@@ -280,7 +280,7 @@
 		});
 
 		imagesCont.css({
-			"left": "-"+(goTo * 100)+"%"
+			transform: "translate3d(-"+(goTo * 100)+"%,0,0)"
 		});
 
 		var theseImages = imagesCont.find(".ignitebox-image");
@@ -366,7 +366,7 @@
 		loadImg(theseImages, nextIndex, true);
 
 		imagesCont.css({
-			left: "-"+(nextIndex * 100)+"%"
+			transform: "translate3d(-"+(nextIndex * 100)+"%,0,0)"
 		})
 
 		theseImages.removeClass('current').eq(nextIndex).addClass('current')
@@ -529,7 +529,9 @@
 		var gallery = $("#ignitebox");
 		var data = gallery.data("ignitebox-swipe");
 		if(typeof data != "undefined") {
-			gallery.find("#ignitebox-images").css("left", "-"+(data.pos)+"%");
+			gallery.find("#ignitebox-images").css({
+				transform: "translate3d("+(data.pos * -1)+"%,0,0)"
+			});
 		}
 	}
 	var updatePosition = _.throttle(_updatePosition, Math.floor(1000 / 60)); //lock this at 60fps
