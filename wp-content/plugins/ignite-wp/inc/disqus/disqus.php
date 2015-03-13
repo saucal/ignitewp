@@ -6,7 +6,7 @@ add_action("init", function(){
     //var_dump($wp_filter["comments_template"]);
     if(function_exists("dsq_comments_template")){
         remove_filter('comments_template', 'dsq_comments_template');
-        add_filter('comments_template', 'mjt_comments_template');
+        add_filter('comments_template', 'ignite_dsq_comments_template');
     }
     wp_register_script( SAUCAL_TPL_ID."-disqus-tools", SAUCAL_TPL_LIB_URL(__FILE__)."/js/disqus-tools.js", array("jquery"), "1.1", false );
     //var_dump($wp_filter["comments_template"]);
@@ -24,7 +24,7 @@ add_action( "wp_enqueue_scripts", function(){
     ) );
 }, 5);
 
-function mjt_sso_login(){
+function ignite_dsq_sso_login(){
     global $current_site;
     $sitename = get_bloginfo('name');
     $siteurl = site_url();
@@ -42,7 +42,7 @@ function mjt_sso_login(){
     return $sso_login_str;
 }
 
-function mjt_comments_template($value) {
+function ignite_dsq_comments_template($value) {
     global $EMBED;
     global $post;
     global $comments;
