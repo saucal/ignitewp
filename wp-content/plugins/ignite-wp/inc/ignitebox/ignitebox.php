@@ -6,7 +6,7 @@ add_ignite_support("transit");
 
 class Saucal_IgniteBox {
 	function Saucal_IgniteBox() {
-		add_action("wp_enqueue_scripts", array($this, "wp_enqueue_scripts"));
+		add_action("wp_enqueue_scripts", array($this, "wp_enqueue_scripts"), 8);
 		add_action("init", array($this, "init"));
 		add_action("wp_ajax_"."get_ignitebox_info", array($this, "get_ignitebox_info"));
 		add_action("wp_ajax_nopriv_"."get_ignitebox_info", array($this, "get_ignitebox_info"));
