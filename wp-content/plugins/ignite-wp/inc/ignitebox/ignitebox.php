@@ -39,6 +39,7 @@ class Saucal_IgniteBox {
 					"height" => $data["sizes"]["full"]["height"],
 					"link" => $data["link"],
 					"guid" => add_query_arg(array("p" => $data["id"]), home_url("/")),
+					"sizes" => $data["sizes"],
 				);
 			}
 		}
