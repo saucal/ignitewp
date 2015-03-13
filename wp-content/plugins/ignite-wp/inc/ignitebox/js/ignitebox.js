@@ -598,6 +598,9 @@
 		}
 	}
 	var updatePosition = _.throttle(_updatePosition, Math.floor(1000 / 60)); //lock this at 60fps
+
+	var updateSwipeMove = _.throttle(_updateSwipeMove, Math.floor(1000 / 60)); //lock this at 60fps
+
 	function swipeDoing(ev){
 		var e = ev.originalEvent;
 		var gallery = $(ev.delegateTarget);
@@ -638,41 +641,28 @@
 		}
 	}
 
-	function updateSwipeMove(data){
-		data.move = {
-			x: data.current.x - data.start.x,
-			y: data.current.y - data.start.y
-		};
-		var windowWidth = $(window).width();
-		var windowHeight = $(window).height();
-		data.movePerc = {
-			x: Math.abs(data.move.x) / windowWidth,
-			y: Math.abs(data.move.y) / windowHeight
-		};
-		if(data.move.x < 0)
-			data.movePerc.x = data.movePerc.x * -1;
-
-		if(data.move.y < 0)
-			data.movePerc.y = data.movePerc.y * -1;
-
-		var pos = (data.currentIndex - data.movePerc.x);
-		if(pos < 0) {
-			pos = 0;
-			/*var cleanData = {
-				start: {
-					x: data.current.x,
-					y: data.current.y
-				},
-				move: {
-					x: 0,
-					y: 0
-				},
+	function _updateSwipeMove(data){
+		_.defer(function(){
+			data.move = {
+				x: data.current.x - data.start.x,
+				y: data.current.y - data.start.y
 			};
-			cleanData.movePerc = $.extend(true, {}, cleanData.move);
-			data = $.extend(true, data, cleanData);*/
-		}
-		pos = pos * 100;
-		data.pos = pos;
+			var windowWidth = cached_width;
+			var windowHeight = cached_height;
+			data.movePerc = {
+				x: Math.abs(data.move.x) / windowWidth,
+				y: Math.abs(data.move.y) / windowHeight
+			};
+			if(data.move.x < 0)
+				data.movePerc.x = data.movePerc.x * -1;
+
+			if(data.move.y < 0)
+				data.movePerc.y = data.movePerc.y * -1;
+
+			var pos = (data.currentIndex - data.movePerc.x);
+			pos = pos * 100;
+			data.pos = pos;
+		})
 	}
 
 
