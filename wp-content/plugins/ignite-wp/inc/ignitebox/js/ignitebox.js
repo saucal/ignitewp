@@ -490,7 +490,9 @@
 		gallery
 		.off('transitionend.closeComments webkitTransitionEnd.closeComments')
 		.off('transitionend.openComments webkitTransitionEnd.openComments')
-		.one('transitionend.openComments webkitTransitionEnd.openComments', ".ignitebox-comment-area", function(e){
+		.on('transitionend.openComments webkitTransitionEnd.openComments', function(e){
+			if(!$(e.originalEvent.srcElement).is(".ignitebox-comment-area"))
+				return;
 			finished = true;
 		  	$(window).trigger("resize.ignitebox");
 		  	gallery.removeClass('comments-opening');
@@ -520,7 +522,9 @@
 		gallery
 		.off('transitionend.openComments webkitTransitionEnd.openComments')
 		.off('transitionend.closeComments webkitTransitionEnd.closeComments')
-		.one('transitionend.closeComments webkitTransitionEnd.closeComments', ".ignitebox-comment-area", function(e){
+		.on('transitionend.closeComments webkitTransitionEnd.closeComments', function(e){
+			if(!$(e.originalEvent.srcElement).is(".ignitebox-comment-area"))
+				return;
 			finished = true;
 		  	$(window).trigger("resize.ignitebox");
 		  	gallery.removeClass('comments-closing');
