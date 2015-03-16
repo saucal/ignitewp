@@ -15,7 +15,7 @@ function add_ignite_support($modules, $enviroment = NULL) {
         $modules = array($modules);
 
     foreach($modules as $module) {
-        if(current_theme_supports( "ignite-".$module ))
+        if(current_theme_supports( "ignite-".$module."-".$enviroment ))
             continue;
 
         $fullPath = IGNITE_INCL.$module;
@@ -47,6 +47,7 @@ function add_ignite_support($modules, $enviroment = NULL) {
         }
         
         add_theme_support("ignite-".$module);
+        add_theme_support("ignite-".$module."-".$enviroment);
 
         global $moduleEnvUrl, $enqueueEnviroment;
         $moduleEnvUrl[] = SAUCAL_TPL_LIB_URL($fullPath);
