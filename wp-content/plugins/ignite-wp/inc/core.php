@@ -71,7 +71,10 @@ function ignite_get_current_enviroment(){
 class Ignite_Scripts {
     var $scripts = array();
     function Ignite_Scripts() {
-        add_action("wp", array($this, "initialize_registering"));
+        $action = "wp";
+        if(is_admin())
+            $action = "admin_init";
+        add_action("admin_init", array($this, "initialize_registering"));
     }
     function register_script($script_id, $path, $deps = array(), $ver = false, $in_footer = false, $enqueue_at_priority = "no") {
         extract(ignite_get_current_enviroment());
@@ -89,7 +92,6 @@ class Ignite_Scripts {
     }
     function initialize_registering(){
         extract(ignite_get_current_enviroment());
-
         foreach($this->scripts as $env => $prios){
             foreach($prios as $prio => $scripts) {
                 foreach($scripts as $script){
@@ -136,7 +138,10 @@ IgniteScripts();
 class Ignite_Styles {
     var $scripts = array();
     function Ignite_Styles() {
-        add_action("wp", array($this, "initialize_registering"));
+        $action = "wp";
+        if(is_admin())
+            $action = "admin_init";
+        add_action("admin_init", array($this, "initialize_registering"));
     }
     function register_style($script_id, $path, $deps = array(), $ver = false, $media = "all", $enqueue_at_priority = "no") {
         extract(ignite_get_current_enviroment());
