@@ -44,7 +44,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 1050;
+  z-index: 105000;
   display: none;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
@@ -92,7 +92,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 1040;
+  z-index: 104000;
   background-color: #000;
 }
 .ignite-modal-backdrop.ignite-fade {
