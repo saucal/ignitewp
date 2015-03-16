@@ -2,7 +2,15 @@
 global $moduleEnvUrl, $enqueueEnviroment;
 $moduleEnvUrl = array();
 $enqueueEnviroment = array();
-function add_ignite_support($modules, $enviroment = "front") {
+function add_ignite_support($modules, $enviroment = NULL) {
+    $data = ignite_get_current_enviroment();
+    if(!isset($enviroment)){
+        if(isset($data["enqueueEnviroment"]))
+            $enviroment = $data["enqueueEnviroment"];
+        else
+            $enviroment = "front";
+    }
+
     if(!is_array($modules))
         $modules = array($modules);
 
