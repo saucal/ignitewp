@@ -6,7 +6,8 @@
 			buttons: {},
 			closeUponDone: false,
 			id: "mapPopUp",
-			submitFormsWithPrimary: false
+			submitFormsWithPrimary: false,
+			icon: false
 		}, options);
 
 		var thisDef = new $.Deferred();
@@ -34,13 +35,35 @@
 			})
 		}
 
-		if(options.title !== false){
-			newDiv("ignite-modal-header")
+		if(options.title !== false || options.icon !== false){
+			var header = newDiv("ignite-modal-header clearfix")
 				.append($('<button type="button" class="close" aria-hidden="true">&times;</button>').on("click", closeWidgetFunc))
-				.append('<h4 class="ignite-modal-title" id="'+options.id+'Label">'+options.title+'</h4>').appendTo(widgetContainer);
+				.appendTo(widgetContainer);
+
+			if(options.icon !== false) {
+				header.append('<h4 class="ignite-modal-icon" id="'+options.id+'Icon">'+options.icon+'</h4>')
+			}
+			if(options.title !== false) {
+				header.append('<h4 class="ignite-modal-title" id="'+options.id+'Label">'+options.title+'</h4>')
+			}
+		} else {
+			$('<button type="button" class="close" aria-hidden="true">&times;</button>').on("click", closeWidgetFunc)
+				.css({
+					width: "1em",
+					margin: "0.25em",
+					zIndex: "1",
+					position: "relative"
+				})
+				.appendTo(widgetContainer);
 		}
 
 		var contents = newDiv("ignite-modal-body").appendTo(widgetContainer);
+
+		if(options.title === false && options.icon === false) {
+			contents.css({
+				padding: "15px 30px"
+			})
+		}
 
 		contents.append(options.contents);
 
