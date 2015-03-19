@@ -74,7 +74,7 @@ class Ignite_Scripts {
         $action = "wp";
         if(is_admin())
             $action = "admin_init";
-        add_action("admin_init", array($this, "initialize_registering"));
+        add_action($action, array($this, "initialize_registering"));
     }
     function register_script($script_id, $path, $deps = array(), $ver = false, $in_footer = false, $enqueue_at_priority = "no") {
         extract(ignite_get_current_enviroment());
@@ -141,7 +141,7 @@ class Ignite_Styles {
         $action = "wp";
         if(is_admin())
             $action = "admin_init";
-        add_action("admin_init", array($this, "initialize_registering"));
+        add_action($action, array($this, "initialize_registering"));
     }
     function register_style($script_id, $path, $deps = array(), $ver = false, $media = "all", $enqueue_at_priority = "no") {
         extract(ignite_get_current_enviroment());
