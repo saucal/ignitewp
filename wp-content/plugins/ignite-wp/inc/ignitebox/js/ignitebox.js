@@ -21,7 +21,7 @@
 		if(!post)
 			post = $(document);
 
-		post.find('a[href$=".png"], a[href$=".jpg"], a[href$=".gif"], a[rel^="attachment "], .gallery a').each(function(){
+		post.find('a[href$=".png"], a[href$=".jpg"], a[href$=".gif"], a[rel^="attachment "], .gallery a, .wp-caption > a').each(function(){
 			var thisLink = $(this);
 			if(typeof thisLink.data("ingitebox-init-def") != "undefined") //if we initialized this already, skip
 				return;
@@ -52,7 +52,8 @@
 
 				getThese[id].push({
 					"link": thisLink,
-					"img": thisImgPreview
+					"img": thisImgPreview,
+					"def": def
 				});
 
 				getTheseIds.push(id);
@@ -127,7 +128,7 @@
 					}
 
 					$.each(elems, function(i, data){
-						var def = data.link.data("ingitebox-init-def");
+						var def = data.def;
 						def[action+"With"](data.link, [$.extend(true, {}, attData)]);
 					});
 				});
