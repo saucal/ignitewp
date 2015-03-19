@@ -42,7 +42,7 @@ if (DISQUS_DEBUG) {
 </div>
 
 <?php if(apply_filters("ignite-disqus-lazy", false)): ?>
-<div class="lazy-load-disqus"><a href="#" data-thread-id="post_<?php the_ID(); ?>">Load Comments</a></div>
+<div class="lazy-load-disqus"><a href="#" data-thread-id="post_<?php the_ID(); ?>"><?php echo apply_filters("ignite-disqus-lazy-button-text", "<span>Lazy Comments</span>"); ?></a></div>
 <?php endif; ?>
 
 <script type="text/javascript">
