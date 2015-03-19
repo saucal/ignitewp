@@ -53,7 +53,7 @@ function add_ignite_support($modules, $enviroment = NULL) {
         $moduleEnvUrl[] = SAUCAL_TPL_LIB_URL($fullPath);
         $enqueueEnviroment[] = $enviroment;
 
-        require_once($fullPath);
+        require($fullPath);
 
         array_pop($moduleEnvUrl);
         array_pop($enqueueEnviroment);
