@@ -7,6 +7,7 @@
 	-webkit-overflow-scrolling: touch;
 	background: rgba(1, 27, 48, 0.95);
 	transition: opacity 0.5s;
+	z-index: 10;
 }
 
 #ignitebox, #ignitebox * {
