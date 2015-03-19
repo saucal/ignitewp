@@ -1,5 +1,6 @@
 <?php
 require_once SAUCAL_TPL_LIB_DIR(__FILE__)."/inc/"."phpQuery-onefile.php";
+require_once SAUCAL_TPL_LIB_DIR(__FILE__)."/inc/"."placehold_it.php";
 
 class Saucal_Lazy_Load_Patcher {
 	var $output = "";
@@ -26,6 +27,7 @@ class Saucal_Lazy_Load_Patcher {
 	static function parse_lazy($html) {
 		$doc = phpQuery::newDocument($html, "text/html");
 		$blankImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+		$placehold_it = new Placehold_it();
 		$selector_containers = apply_filters("lazy_load_selector_containers", array());
 		$selector = apply_filters("lazy_load_selector", "img");
 		$fullSelector = "";
@@ -43,7 +45,15 @@ class Saucal_Lazy_Load_Patcher {
 			$noscript = pq("<noscript/>", $doc);
 			$noscript->append($clone)->insertBefore($node);
 			$node->setAttribute('data-src', $node->getAttribute('src'));
-			$node->setAttribute('src',      $blankImage);
+
+			$width = $node->getAttribute('width');
+			$height = $node->getAttribute('height');
+			if($width && $height){
+				$node->setAttribute('src', $placehold_it->get($width, $height));
+			} else {
+				$node->setAttribute('src', $blankImage);
+			}
+
 			$node->setAttribute('class',    trim($node->getAttribute('class') . ' lazy'));
 		}
 		$new_html = $doc->htmlOuter();
