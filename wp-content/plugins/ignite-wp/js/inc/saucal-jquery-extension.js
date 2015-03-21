@@ -600,14 +600,16 @@
 	}
 	$.onElementResizeClass.prototype.init = function(){
 		var thisRef = this;
+		thisRef.realCheckResize = _.debounce(thisRef.checkResize, 18);
 		this.resetInterval();
 		$(window).bind('resize', function(){
-			thisRef.checkResize();
+			thisRef.realCheckResize();
 		});
 	}
 	$.onElementResizeClass.prototype.add = function(element, callback, hard){
 		this.elemsToCheck.push({
 			element: element,
+			$element: $(element),
 			callbacks: [callback],
 			width: $(element).width(),
 			height: $(element).height(),
@@ -623,7 +625,7 @@
 		clearTimeout(thisRef.timer);
 		thisRef.timer = undefined;
 		thisRef.timer = setTimeout(function(){
-			thisRef.checkResize(true);
+			thisRef.realCheckResize(true);
 		}, time);
 	}
 	$.onElementResizeClass.prototype.checkResize = function(hard) {
@@ -631,25 +633,69 @@
 		$.each(this.elemsToCheck, function(i, item){
 			if(hard && !item.hard)
 				return;
+
+			var thisIsIt = item.element;
+			var thisIsThat = item.$element;
+
+			if(thisIsIt !== window) {
+				item.cssOldWidth = thisIsThat.get(0).style.width;
+				item.cssOldHeight = thisIsThat.get(0).style.height;
+			}
+
+			thisIsThat.css({
+				width: "",
+				height: ""
+			});
+		});
+		$.each(this.elemsToCheck, function(i, item){
+			if(hard && !item.hard)
+				return;
+
+			var thisIsIt = item.element;
+			var thisIsThat = item.$element;
+			if(thisIsIt === window || thisIsThat.css("display") !== "none"){
+				if(thisIsIt == window){
+					item.widthn = thisIsThat.width(),
+					item.heightn = thisIsThat.height();
+				} else {
+					item.widthn = thisIsThat.get(0).offsetWidth,
+					item.heightn = thisIsThat.get(0).offsetHeight;
+				}
+			} else {
+				item.widthn = false;
+				item.heightn = false;
+			}
+		});
+		var cbs = [];
+		$.each(this.elemsToCheck, function(i, item){
+			if(hard && !item.hard)
+				return;
 			
 			var thisIsIt = item.element;
-			var thisIsThat = $(thisIsIt);
+			var thisIsThat = item.$element;
 			var callbacks = item.callbacks;
 
-			if(thisIsIt === window || thisIsThat.css("display") !== "none"){
-				var widthn = thisIsThat.width(),
-					heightn = thisIsThat.height();
-
+			if(item.widthn != false){
 				//console.log(width, " ", widthn, " | ", height, " ", heightn);
-				if(item.width != widthn || item.height != heightn){
-					thisRef.elemsToCheck[i].width = widthn;
-					thisRef.elemsToCheck[i].height = heightn;
+				if(item.width != item.widthn || item.height != item.heightn){
+					thisRef.elemsToCheck[i].width = item.widthn;
+					thisRef.elemsToCheck[i].height = item.heightn;
 					$.each(callbacks, function(i, callback){
-						callback.call(thisIsIt);
+						cbs.push({f: callback, e: thisIsIt});
+					});
+				} else {
+					thisIsThat.css({
+						width: item.cssOldWidth,
+						height: item.cssOldHeight
 					})
 				}
+				delete item.widthn;
+				delete item.heightn;
 			}
 		})
+		$.each(cbs, function(i, cb){
+			cb.f.call(cb.e);
+		});
 		this.resetInterval();
 	}
 	$.onElementResize = new $.onElementResizeClass();

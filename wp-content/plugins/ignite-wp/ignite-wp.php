@@ -26,7 +26,7 @@ add_action("after_setup_theme", function(){
 });
 
 add_action("init", function(){
-	wp_register_script( "saucal-jquery-extension", IGNITE_BASE_URL."/js/inc/saucal-jquery-extension.js", array("jquery"), "3.0", false );
+	wp_register_script( "saucal-jquery-extension", IGNITE_BASE_URL."/js/inc/saucal-jquery-extension.js", array("underscore", "jquery"), "3.0", false );
 });
 
 ?>
