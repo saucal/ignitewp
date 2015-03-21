@@ -768,49 +768,41 @@
 		if(offset === undefined) offset = 0;
 		if(filler_class === undefined) filler_class = false;
 		var thisIsIt = this;
-		adjust = function(){
+		var adjust = function(){
 			var maxHeight = 0;
 			$(thisIsIt).each(function(){
 				var thisEl = $(this);
-				thisEl.getFiller(filler_class).css("height", "");
-				var height = thisEl.height();
+				var height = thisEl.get(0).offsetHeight;
 				if(height > maxHeight){
 					maxHeight = height;
 				}
-			})
+			});
 			$(thisIsIt).each(function(){
-				$(this).getFiller(filler_class).height(maxHeight);
+				var filler = $(this).getFiller(filler_class);
+				filler.css("height", maxHeight);
 			});
 		}
-		$(thisIsIt).onElementResize(adjust)
-		adjust.call(thisIsIt);
+		$(thisIsIt).onElementResize(adjust, true)
 	}
 	$.fn.consistentWidth = function(filler_class, offset){
 		if(offset === undefined) offset = 0;
+		if(filler_class === undefined) filler_class = false;
 		var thisIsIt = this;
-		adjust = function(){
+		var adjust = function(){
 			var maxWidth = 0;
 			$(thisIsIt).each(function(){
 				var thisEl = $(this);
-				//console.log(thisEl.getFiller(filler_class).css("width"), " ", thisEl.getFiller(filler_class).get(0));
-				thisEl.getFiller(filler_class).css("width", "");
-				//console.log(thisEl.getFiller(filler_class).css("width"), " ", thisEl.getFiller(filler_class).get(0));
-				var width = thisEl.width();
-
-				//console.log("current: ", width, " | maximum: ", maxWidth);
+				var width = thisEl.get(0).offsetWidth;
 				if(width > maxWidth){
 					maxWidth = width;
 				}
 			})
-
-			//console.log("maximum: ", maxWidth);
-			
 			$(thisIsIt).each(function(){
-				$(this).getFiller(filler_class).width(maxWidth + offset);
-			})
+				var filler = $(this).getFiller(filler_class);
+				filler.css("width", maxWidth);
+			});
 		}
-		$(thisIsIt).onElementResize(adjust)
-		adjust.call(thisIsIt);
+		$(thisIsIt).onElementResize(adjust, true);
 	}
 	$.fn.hoverFaded = function(){
 		var thisIsIt = this;
