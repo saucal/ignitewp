@@ -607,9 +607,11 @@
 		});
 	}
 	$.onElementResizeClass.prototype.add = function(element, callback, hard){
+		var $element = $(element);
+		var thisRef = this;
 		this.elemsToCheck.push({
 			element: element,
-			$element: $(element),
+			$element: $element,
 			callbacks: [callback],
 			width: $(element).width(),
 			height: $(element).height(),
@@ -618,6 +620,13 @@
 		if(typeof this.timer === "undefined") {
 			this.init();
 		}
+		$element.on("elemResize", function(e, hard){
+			if(hard){
+				thisRef.checkResize();
+			} else {
+				thisRef.realCheckResize();
+			}
+		})
 	}
 	$.onElementResizeClass.prototype.resetInterval = function(time){
 		if(typeof time === "undefined") time = 50;
