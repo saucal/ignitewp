@@ -600,7 +600,7 @@
 	}
 	$.onElementResizeClass.prototype.init = function(){
 		var thisRef = this;
-		thisRef.realCheckResize = _.debounce(thisRef.checkResize, 18);
+		thisRef.realCheckResize = _.debounce(thisRef.checkResize, 10);
 		this.resetInterval();
 		$(window).bind('resize', function(){
 			thisRef.realCheckResize();
