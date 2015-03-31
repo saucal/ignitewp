@@ -255,7 +255,7 @@ if(!class_exists("SaucalCMB")){
 
 					case "image":
 						$defaults = array(
-							'save_format' => 'object',
+							'return_format' => 'array',
 							'preview_size' => 'thumbnail',
 							'library' => 'all',
 						);
@@ -372,6 +372,7 @@ if(!class_exists("SaucalCMB")){
 						'position' => $box["position"],
 						'layout' => 'default',
 						'hide_on_screen' => array(),
+						'label_placement' => 'left',
 					),
 				);
 				$boxes[] = $metaData;
