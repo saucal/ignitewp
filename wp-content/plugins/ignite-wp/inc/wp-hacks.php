@@ -1,6 +1,6 @@
 <?php 
 //Undo autop around shortcodes.
-add_filter('the_content', function($content) {   
+function fix_autop($content) {  
     $array = array (
         '<p>[' => '[', 
         ']</p>' => ']', 
@@ -10,5 +10,7 @@ add_filter('the_content', function($content) {
     $content = strtr($content, $array);
 
     return $content;
-});
+}
+add_filter('acf_the_content', "fix_autop");
+add_filter('the_content', "fix_autop");
 ?>
