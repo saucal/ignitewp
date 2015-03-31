@@ -1,14 +1,14 @@
 IgniteWP
 =========
 
-A WordPress Theme Framework developed by Saucal Studios
+A WordPress Theme Framework developed by Saucal Inc.
 
 Why would it help me?
 ----------------------
 
 It will speed up the time you spend doing those repetitive tasks when building themes for WP. You just need to add the modules you need to the inc folder, and it will autoload all the plugins that will make your life easier.
 
-What's the phylosophy behind it?
+What's the philosophy behind it?
 ---------------------------------
 
 We love WordPress, and we love building stuff using it. But we also love to get right to the creation part, we don't want to spend a couple of hours setting up everything we are going to be using, we love "plug and play" solutions. And since some times we don't find those, we build a module for this.
