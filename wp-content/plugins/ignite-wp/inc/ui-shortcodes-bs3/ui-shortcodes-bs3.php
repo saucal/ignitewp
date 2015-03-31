@@ -113,10 +113,8 @@ function SUISC_preFlight($content) {
 }
 
 add_filter("the_content", "SUISC_preFlight", 9);
-add_filter("acf_the_content", "SUISC_preFlight", 9);
 
 add_filter("the_content", "SUISC_resetPercCount", 12); //This resets the percentage fill count to 0 after the shortcodes has been executed.
-add_filter("acf_the_content", "SUISC_resetPercCount", 12); //This resets the percentage fill count to 0 after the shortcodes has been executed.
 
 add_shortcode( "one-full", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
