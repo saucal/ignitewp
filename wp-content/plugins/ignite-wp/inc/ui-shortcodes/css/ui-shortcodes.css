@@ -37,4 +37,5 @@
 
 .sc-column.first {
 	margin-left: 0%;
+	clear: left;
 }
