@@ -109,7 +109,7 @@
 
 		thisDef.fail(closeWidgetFunc)
 
-		widgetBigArea.modal()
+		widgetBigArea.igniteModal()
 		widgetBigArea.on("hide.bs.modal", function(){
 			if(thisDef.state("pending")){
 				thisDef.reject();

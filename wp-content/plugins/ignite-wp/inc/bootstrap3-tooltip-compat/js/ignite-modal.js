@@ -301,17 +301,17 @@
     })
   }
 
-  var old = $.fn.modal
+  var old = $.fn.igniteModal
 
-  $.fn.modal             = Plugin
-  $.fn.modal.Constructor = Modal
+  $.fn.igniteModal             = Plugin
+  $.fn.igniteModal.Constructor = Modal
 
 
   // MODAL NO CONFLICT
   // =================
 
-  $.fn.modal.noConflict = function () {
-    $.fn.modal = old
+  $.fn.igniteModal.noConflict = function () {
+    $.fn.igniteModal = old
     return this
   }
 
