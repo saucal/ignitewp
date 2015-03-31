@@ -1,4 +1,30 @@
 (function($){
+	$.fn.ajaxAPIData = function(prop, val) {
+		var data = this.data("ajaxAPI");
+		if(!data){
+			data = {}
+			this.data("ajaxAPI", data);
+		}
+		if(typeof prop == "undefined") {
+			return data;
+		} else if(typeof prop == "object") {
+			for(pr in prop) {
+				val = prop[pr];
+				data[pr] = val;
+			}
+		} else {
+			if(typeof val == "undefined"){
+				if(typeof data[prop] != "undefined")
+					return data[prop]
+				else
+					return undefined;
+			} else {
+				data[prop] = val;
+				return this;
+			}
+		}
+	}
+
 	String.prototype.endsWith = function(str){
 		return (this.lastIndexOf(str) + str.length - this.length) == 0 ? true : false;
 	}
@@ -27,6 +53,22 @@
 			return false;
 		}
 	}
+
+	window.getLocationObject = function(url) {
+		var a = document.createElement('a');
+	    a.href = url;
+	    return {
+	    	hash: a.hash,
+	    	host: a.host,
+	    	hostname: a.hostname,
+	    	href: a.href,
+	    	pathname: a.pathname,
+	    	port: a.port,
+	    	protocol: a.protocol,
+	    	search: a.search
+	    }
+	}
+
 	window.addParam = function(url, _param, _value) {
 	    var a = document.createElement('a');
 	    a.href = url;
@@ -48,24 +90,18 @@
 	    return a.href;
 	}
 
-	var SAUCAL_AJAX_BUFFER = function(){
+	window.arrayClean = function(array){
+		var newArray = [];
+		for(var i=0;i<array.length;i++) {
+			if(!!array[i])
+				newArray.push(array[i]);
+		}
+		return newArray;
+	}
+
+	var SAUCAL_AJAX_BUFFER = function(api){
 		this.buffer = $();
-		this.callbacks = {};
-	}
-	SAUCAL_AJAX_BUFFER.prototype.on = function(evt, callback){
-		if(typeof this.callbacks[evt] == "undefined"){
-			this.callbacks[evt] = [];
-		}
-		this.callbacks[evt].push(callback);
-	}
-	SAUCAL_AJAX_BUFFER.prototype.trigger = function(evt, elem, params){
-		if(typeof this.callbacks[evt] == "undefined" || this.callbacks[evt].length == 0){
-			return false;
-		}
-		$.each(this.callbacks[evt], function(i, cb){
-			cb.apply(elem, params);
-		})
-		//this.callbacks[evt].push(callback);
+		this.api = api;
 	}
 	SAUCAL_AJAX_BUFFER.prototype.add = function(newElem, url, params){
 		if(typeof url == "undefined")
@@ -82,23 +118,28 @@
 				replaceData: false,
 				data: {
 					url: clearHashFromURL(url),
-					title: document.title
+					title: newElem.data("ajax-title") || document.title,
+					bodyClass: $("body").attr("class")
 				}
 			}, params);
 			
+			if(newElem.data("ajax-alias")) {
+				var aliasesVisible = this.getByAlias(newElem.data("ajax-alias"));
+				if(aliasesVisible.length == 0)
+					ret.ajaxAPIData("is-main-alias", true);
+			}
+
 			if(typeof params.data == "object"){
 				$.each(params.data, function(prop, val){
 					if(params.replaceData === false){
-						if(typeof ret.data(prop) !== "undefined")
+						if(typeof ret.ajaxAPIData(prop) !== "undefined")
 							return;
 					}
-					ret
-					.data(prop, val)
-					.attr("data-"+prop, val)
+					ret.ajaxAPIData(prop, val);
 				})
 			}
 
-			this.trigger("pre-buffer", ret, [url, params]);
+			this.api.triggerWith("pre-buffer", url, ret, [params]);
 			
 			this.buffer = this.buffer.add(ret);
 		} else {
@@ -106,28 +147,185 @@
 		}
 		return ret;
 	}
+	SAUCAL_AJAX_BUFFER.prototype.getByAlias = function(url) {
+		var mainAliases = this.buffer.filter(function(){
+			return !!$(this).ajaxAPIData("is-main-alias");
+		});
+		var thisUrlAliases = mainAliases.filter(function(){
+			return clearHashFromURL($(this).data("ajax-alias")) == clearHashFromURL(url)
+		});
+		return thisUrlAliases;
+	}
 	SAUCAL_AJAX_BUFFER.prototype.get = function(url, params){
 		if(typeof url == "function"){
 			return this.buffer.filter(url);
 		} else {
-			return this.buffer.filter(function(){
-				return $(this).data("url") === clearHashFromURL(url);
-			});
+			var aliasesVisible = this.getByAlias(url);
+			if(aliasesVisible.length > 0)
+				return aliasesVisible.first().ajaxAPIData("aliasing-as", clearHashFromURL(url));
+			else //if we didn't find aliases, go with the standard search
+				return this.buffer.filter(function(){
+					return $(this).ajaxAPIData("url") === clearHashFromURL(url);
+				});
 		}
 	}
 
-	var contentBuffer = new SAUCAL_AJAX_BUFFER();
+	var contentBuffer;
 	
+	var SAUCAL_AJAX_EVENTS = function(defaultScope){
+		this.defaultScope = this;
+		if(defaultScope)
+			this.defaultScope = defaultScope;
+		this.events = {};
+	}
+	SAUCAL_AJAX_EVENTS.prototype.attachEvt = function(evt, url, fn, once) {
+		if(!evt)
+			throw new Exception("noEvt", "You're doing it wrong");
 
+		if(typeof url == "function") {
+			fn = url;
+			url = undefined;
+		}
+
+		if(typeof this.events[evt] == "undefined")
+			this.events[evt] = [];
+
+		this.events[evt].push({
+			filter: url,
+			once: once,
+			fn: fn 
+		})
+
+		return this;
+	}
+	SAUCAL_AJAX_EVENTS.prototype.off = function(evt, url, fn) {
+		if(!evt)
+			throw new Exception("noEvt", "You're doing it wrong");
+
+		if(typeof this.events[evt] == "undefined")
+			return;
+
+		if(this.events[evt].length == 0)
+			return;
+
+		if(typeof url == "function") {
+			fn = url;
+			url = undefined;
+		}
+
+		var localEvents = arrayClean(this.events[evt]);
+		for(var j=0;j<this.events[evt].length;j++) {
+			var curr = this.events[evt][j];
+			if(!!url && !!fn) {
+				if(curr.filter == url && curr.fn === fn)
+					localEvents[j] = undefined;
+			} else if(!!url) {
+				if(curr.filter == url)
+					localEvents[j] = undefined;
+			} else if(!!fn) {
+				if(curr.fn === fn)
+					localEvents[j] = undefined;
+			} else {
+				localEvents[j] = undefined;
+			}
+		}
+		var newEvents = arrayClean(localEvents);
+		this.events[evt] = newEvents;
+	}
+	SAUCAL_AJAX_EVENTS.prototype.on = function(evt, url, fn) {
+		return this.attachEvt(evt, url, fn, false);
+	} 
+	SAUCAL_AJAX_EVENTS.prototype.one = function(evt, url, fn) {
+		return this.attachEvt(evt, url, fn, true);
+	} 
+	SAUCAL_AJAX_EVENTS.prototype.triggerWith = function(evt, url, scope, params) {
+		var eventObj;
+		if(typeof evt == "string") {
+			eventObj = jQuery.Event( evt );
+		} else {
+			eventObj = evt;
+			evt = evt.type;
+		}
+
+		if(typeof url != "string" && typeof url != "undefined"){
+			if(Array.isArray(scope) && typeof params == "undefined")
+				params = scope;
+
+			scope = url;
+			url = undefined;
+		}
+
+		if(Array.isArray(scope) && typeof params == "undefined") {
+			params = scope;
+			scope = undefined;
+		}
+
+		if(typeof params == "undefined")
+			params = [];
+
+		if(!!url) 
+			eventObj.url = url;
+
+		if(!!scope)
+			eventObj.targetScope = scope;
+
+		params.unshift(eventObj);
+
+		return this.trigger.apply(this, params);
+	}
+	SAUCAL_AJAX_EVENTS.prototype.trigger = function(evt) {
+		var eventObj;
+		if(typeof evt == "string") {
+			eventObj = jQuery.Event( evt );
+		} else {
+			eventObj = evt;
+			evt = evt.type;
+		}
+
+		var fnParams = arrayClean(arguments).slice(1);
+		fnParams.unshift(eventObj);
+
+		var fnScope = this.defaultScope;
+		if(typeof eventObj.targetScope != "undefined")
+			fnScope = eventObj.targetScope;
+
+		if(typeof this.events[evt] != "undefined") {
+			var url;
+			if(typeof eventObj.url != "undefined")
+				url = eventObj.url;
+
+			var localEvents = arrayClean(this.events[evt]);
+			for(var j=0;j<localEvents.length;j++) {
+				var curr = localEvents[j];
+				if((!!curr.filter && curr.filter == url) || !(!!url) || !(!!curr.filter)){
+					curr.fn.apply(fnScope, fnParams);
+					if(!!curr.once)
+						this.off(evt, curr.fn);
+					if(eventObj.isImmediatePropagationStopped())
+						break;
+				}
+			}
+		}
+
+		if(typeof fnScope["trigger"] != "undefined")
+			fnScope.trigger(eventObj, arrayClean(arguments).slice(1));
+
+		return eventObj;
+	}
 	
 	
 	var SAUCAL_AJAX_QUEUE = function(){
 		this.resetQueue();
+		this.queueId = 0;
 	}
 	SAUCAL_AJAX_QUEUE.prototype.resetQueue = function(){
 		this.queue = [];
-		this.queueId = Math.random();
+		this.queueId++;
 		this.working = false;
+		return this.queueId;
+	}
+	SAUCAL_AJAX_QUEUE.prototype.getQueue = function() {
+		return this.queueId;
 	}
 	SAUCAL_AJAX_QUEUE.prototype.enqueue = function(method, url, data, callback){
 		var hasToStart = this.queue.length == 0 ? true : false;
@@ -138,7 +336,6 @@
 	SAUCAL_AJAX_QUEUE.prototype.dequeue = function(){
 		var thisQueue = this;
 		if(this.queue.length > 0 && this.working == false){
-			var qId = this.queueId;
 			this.working = true;
 			var thisReq = this.queue.shift();
 			var method = thisReq[0],
@@ -154,8 +351,6 @@
 				method: method,
 				data: data,
 				complete: function(jqXHR){
-					if(qId != thisQueue.queueId)
-						return;
 					callback.apply(window, [jqXHR.responseText]);
 					thisQueue.working = false;
 					thisQueue.dequeue();
@@ -180,81 +375,105 @@
 	    this.popped = ('state' in window.history && window.history.state !== null);
 	    this.popped = false;
 	    this.initialURL = location.href;
+	    this.initialTitle = document.title;
+
+	    this.contentBuffer = new SAUCAL_AJAX_BUFFER(this);
+	    contentBuffer = this.contentBuffer;
+
+	    this.globalEvents = new SAUCAL_AJAX_EVENTS($(document));
+
+	    this.on = $.proxy(this.globalEvents.on, this.globalEvents);
+	    this.off = $.proxy(this.globalEvents.off, this.globalEvents);
+	    this.one = $.proxy(this.globalEvents.one, this.globalEvents);
+	    this.trigger = $.proxy(this.globalEvents.trigger, this.globalEvents);
+	    this.triggerWith = $.proxy(this.globalEvents.triggerWith, this.globalEvents);
 
 	    this.config = $.extend(true, {}, {
 	    	contentSelector: "#content",
 			menuSelector: {
-				menu: "ul.menu",
+				menu: "#header ul.menu",
 				item: "li.menu-item"
 			},
 			loader: {
 				show: null,
 				hide: null
 			},
-			beforeBuffer: function(content){
-				return true;
-			},
-			changeBufferData: function(bufferData, content, ajaxBody){
-				return bufferData;
-			},
-			callbacks: {
-				prevHideOldContent: function(){},
-				afterShow: function(){},
-				prevShow: function(){},
-				afterInitShow: function(){}
+			animDefGet: function(newContent, currContent) {
+				return currContent.fadeOut(200).promise();
 			}
 		});
 
-	    var recursiveApiEval = function(items) {
-	    	$.each(items, function(i, item){
-	    		if(typeof item == "string"){
-	    			if(item.indexOf("function") == 0) {
-	    				try {
-	    					item = eval("("+item+")");
-	    				} catch(e) {
-	    					console.error(e);
-	    				}
-	    			}
-	    			items[i] = item;
-	    		}
-	    		if(typeof item == "object" && item !== null)
-	    			items[i] = recursiveApiEval(item);
-	    	})
-	    	return items;
-	    }
-
-	    ajax_api_config = recursiveApiEval(ajax_api_config);
-
 	    this.config = $.extend(true, this.config, ajax_api_config);
+
+	    this.trigger("ajaxConfig", this);
 	}
 	SAUCAL_AJAX_API.prototype.setup = function(_config){
 		this.config = $.extend(true, this.config, _config);
 	}
-	
+
 	SAUCAL_AJAX_API.prototype.historyApiSupported = function(){
 		return !!(window.history && history.pushState);
 	}
 	SAUCAL_AJAX_API.prototype.pushState = function(state, title, href){
-    	if(this.historyApiSupported()){
-    		history.pushState(state, title, href);
+    	var evt = this.triggerWith("saucal_pushstate", href);
+    	if(this.historyApiSupported() && !evt.isDefaultPrevented()){
+    		history.pushState({
+    			ajaxAPI: {
+    				state: state,
+    				title: title
+				}
+			}, title, href);
+    		document.title = title;
+    		this.analyticsPush(title, href);
     		this.popped = true;
     	}
+    	return evt;
     }
     SAUCAL_AJAX_API.prototype.replaceState = function(state, title, href){
-    	if(this.historyApiSupported()){
-    		history.replaceState(state, title, href);
+    	var evt = this.triggerWith("saucal_replacestate", href);
+    	if(this.historyApiSupported() && !evt.isDefaultPrevented()){
+    		history.replaceState({
+    			ajaxAPI: {
+    				state: state,
+    				title: title
+				}
+			}, title, href);
+    		document.title = title;
+    		this.analyticsPush(title, href);
     	}
+    	return evt;
+    }
+    SAUCAL_AJAX_API.prototype.popState = function(state, title, href) {
+    	var evt = this.triggerWith("saucal_popstate", href);
+    	if(this.historyApiSupported() && !evt.isDefaultPrevented()){
+    		document.title = title;
+    		this.analyticsPush(title, href);
+    	}
+    	return evt;
+    }
+    SAUCAL_AJAX_API.prototype.analyticsPush = function(title, url) {
+    	var loc = getLocationObject(url);
+    	var analyticsPath = loc.pathname + loc.search + loc.hash;
+		if(typeof ga != "undefined") {
+			ga('send', 'pageview', {
+				'page': analyticsPath,
+				'title': title
+			});
+		}
+		if(typeof _gaq != "undefined") {
+			_gaq.push(['_trackPageview', analyticsPath]);
+		}
     }
     SAUCAL_AJAX_API.prototype.init = function(){
     	var content = $(this.config.contentSelector);
     	contentBuffer.add(content);
-		content.trigger("showingPage", [content]);
-    	content.trigger("contentReady", [content]);
-		content.data("contentAlreadyLoaded", true);
-		content.trigger("contentLoad", [content]);
+    	this.triggerWith("showingPage", content, [content]);
+    	this.triggerWith("contentReady", content, [content]);
+		content.ajaxAPIData("contentAlreadyLoaded", true);
+		this.triggerWith("contentLoad", content, [content]);
     }
     SAUCAL_AJAX_API.prototype.markLinks = function(href){
-		$(ajaxAPI.config.menuSelector.menu+" "+ajaxAPI.config.menuSelector.item+" a").each(function(){
+		$(ajaxAPI.config.menuSelector.item+" a").each(function(){
 			$(this).parentsUntil(ajaxAPI.config.menuSelector.menu, ajaxAPI.config.menuSelector.item)
 					.removeClass("current-menu-item").removeClass("current_page_item")
 					.removeClass("current_page_parent")
@@ -329,8 +548,48 @@
     		this.config.loader.hide.call(thisScope)
     	}
     }
+    SAUCAL_AJAX_API.prototype.getPage = function(url, linkElem) {
+    	if(typeof url !== "string" && typeof url != "undefined"){
+    		linkElem = url;
+    		url = linkElem.prop("href");
+    	}
 
-    SAUCAL_AJAX_API.prototype.load = function (linkElem, doPush) {
+    	if(typeof linkElem == "undefined")
+    		linkElem = $();
+
+    	var def = $.Deferred();
+    	var buffer = contentBuffer.get(url);
+		if(buffer.length > 0){
+			def.resolve(buffer);
+		} else {
+			ajaxAPI.showLoader(linkElem);
+
+			var qId = ajaxQuery.resetQueue();
+			ajaxQuery.get(addParam(url, "iframed", "1"), function(data){
+				var ajaxBody = $("<div></div>").html(data);
+				var content = ajaxBody.find(ajaxAPI.config.contentSelector);
+
+				var hasToBuffer = ajaxAPI.trigger("beforeBuffer", content);
+				var ret = $();
+				if(!hasToBuffer.isDefaultPrevented()){
+					var bufferData = {
+						data: {
+							title: ajaxBody.find(".title-helper").text(),
+							bodyClass: ajaxBody.find(".body-class-helper").removeClass('body-class-helper').attr("class"),
+						}
+					};
+					ret = contentBuffer.add(content, url, bufferData)
+				}
+				if(ret.length > 0 && !ret.is($(ajaxAPI.config.contentSelector))) 
+					if(qId == ajaxQuery.getQueue())
+						def.resolve(ret);
+				
+				ajaxAPI.stopLoader(linkElem);
+			});
+		}
+		return def.promise();
+    }
+    SAUCAL_AJAX_API.prototype.load = function (linkElem, doPush, def) {
 
     	if(doPush === undefined)
     		doPush = true;
@@ -343,78 +602,114 @@
     		url = linkElem.prop("href");
     	}
 
-    	var def = $.Deferred();
+    	if(typeof def == "undefined")
+    		def = $.Deferred();
+
+    	var currentContent = $(ajaxAPI.config.contentSelector);
 
     	//check that the target is not the same as the source
-		if(clearHashFromURL(url) == clearHashFromURL($(ajaxAPI.config.contentSelector).data("url"))){
-			def.reject();
-			return def.promise();
+		if(clearHashFromURL(url) == currentContent.ajaxAPIData("url")) {
+			var alias = currentContent.ajaxAPIData("aliasing-as");
+			if(!alias || alias == clearHashFromURL(url)) {
+				def.reject();
+				return def.promise();
+			}
 		}
 		//var iframe = $("#virtexBuffer");
 
-		ajaxQuery.resetQueue();
-
-		if(doPush) 
-			ajaxAPI.pushState({}, null, url);
-
-		var buffer = contentBuffer.get(url);
-		if(buffer.length > 0){
-			ajaxAPI.showPage(buffer);
-		} else {
-			ajaxAPI.showLoader(linkElem);
-			ajaxQuery.get(addParam(url, "iframed", "1"), function(data){
-
-				var ajaxBody = $("<div></div>").html(data);
-				var content = ajaxBody.find(ajaxAPI.config.contentSelector);
-
-				var hasToBuffer = ajaxAPI.config.beforeBuffer(content);
-				var ret = $();
-				if(hasToBuffer){
-					var bufferData = ajaxAPI.config.changeBufferData({
-						data: {
-							title: ajaxBody.find(".title-helper").text()
-						}
-					}, content, ajaxBody);
-					ret = contentBuffer.add(content, url, bufferData)
-				}
-				if(ret.length > 0 && !ret.is($(ajaxAPI.config.contentSelector))) 
-					ajaxAPI.showPage(ret);
-				
-				ajaxAPI.stopLoader(linkElem);
-			});
-		}
+		ajaxAPI.getPage(url, linkElem).done(function(buffer) {
+			ajaxAPI.showPage(buffer, def, doPush);
+		});
 
 		return def.promise();
     }
+	function isInDOMTree(node) {
+	   // If the farthest-back ancestor of our node has a "body"
+	   // property (that node would be the document itself), 
+	   // we assume it is in the page's DOM tree.
+	   return !!(findUltimateAncestor(node).body);
+	}
+	function findUltimateAncestor(node) {
+	   // Walk up the DOM tree until we are at the top (parentNode 
+	   // will return null at that point).
+	   // NOTE: this will return the same node that was passed in 
+	   // if it has no ancestors.
+	   var ancestor = node;
+	   while(ancestor.parentNode) {
+	      ancestor = ancestor.parentNode;
+	   }
+	   return ancestor;
+	}
 
-    SAUCAL_AJAX_API.prototype.showPage = function(newContent){
-		var href = newContent.data("url");
+	SAUCAL_AJAX_API.prototype.switchTo = function(newContent) {
+		var currContent = $(ajaxAPI.config.contentSelector).first();
+		var effDef = ajaxAPI.config.animDefGet(newContent, currContent);
+		var href = newContent.ajaxAPIData("url");
+		effDef.done(function(){
+			if(!isInDOMTree(newContent.get(0)))
+				newContent.hide().insertAfter(currContent);
+
+			var e = ajaxAPI.triggerWith( "showingPage", href, newContent, [newContent] );
+			if(!e.isDefaultPrevented()){
+				if(!!newContent.ajaxAPIData("bodyClass")) {
+					$("body").attr("class", newContent.ajaxAPIData("bodyClass"));
+				}
+			}
+
+			currContent.detach();
+			ajaxAPI.triggerWith( "contentLoad", href, newContent, [newContent] );
+			newContent.fadeIn(200, function(){
+				ajaxAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+			});
+			ajaxAPI.triggerWith( "afterInitShow", href, newContent, [newContent] );
+		})
+	}
+
+    SAUCAL_AJAX_API.prototype.showPage = function(newContent, def, doPush){
+    	var thisAPI = this;
+    	if(typeof def === "undefined")
+    		def = $.Deferred();
+
+		var href = newContent.ajaxAPIData("url");
 		
 		ajaxAPI.markLinks(href);
 
-		ajaxAPI.config.callbacks.prevHideOldContent.call(newContent);
+		var currContent = $(ajaxAPI.config.contentSelector);
 
-		$(ajaxAPI.config.contentSelector).fadeOut(200, function(){
-			newContent.hide().insertAfter($(this));
+		var effDef = $.Deferred();
+		var ret = thisAPI.triggerWith("prevHideOldContent", href, $(document), [newContent, currContent, effDef, def]);
+		if(ret.isDefaultPrevented()) {
+			return def.promise();
+		}
+		effDef = ajaxAPI.config.animDefGet(newContent, currContent);
 
-			var e = jQuery.Event( "showingPage" );
-			newContent.trigger( e, [newContent] );
+		effDef.done(function(){
+			if(!isInDOMTree(newContent.get(0)))
+				newContent.hide().insertAfter(currContent);
+
+			var e = thisAPI.triggerWith( "showingPage", href, newContent, [newContent] );
 			if(!e.isDefaultPrevented()){
-				document.title = newContent.data("title");
+				if(doPush) 
+					ajaxAPI.pushState({}, newContent.ajaxAPIData("title"), href);
+
+				if(!!newContent.ajaxAPIData("bodyClass")) {
+					$("body").attr("class", newContent.ajaxAPIData("bodyClass"));
+				}
 			}
 
-			if(!newContent.data("contentAlreadyLoaded")){
-				newContent.trigger("contentReady", [newContent]);
-				newContent.data("contentAlreadyLoaded", true);
+			if(!newContent.ajaxAPIData("contentAlreadyLoaded")) {
+				thisAPI.triggerWith( "contentReady", href, newContent, [newContent] );
+				newContent.ajaxAPIData("contentAlreadyLoaded", true);
 			}
-			$(this).detach();
-			ajaxAPI.config.callbacks.prevShow.call(newContent);
-			newContent.trigger("contentLoad", [newContent]).fadeIn(200, function(){
-				ajaxAPI.config.callbacks.afterShow.call(newContent);
+			currContent.detach();
+			thisAPI.triggerWith( "contentLoad", href, newContent, [newContent] );
+			newContent.fadeIn(200, function(){
+				thisAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+				def.resolveWith(newContent, [newContent]);
 			});
-			ajaxAPI.config.callbacks.afterInitShow.call(newContent);
-			
+			thisAPI.triggerWith( "afterInitShow", href, newContent, [newContent] );
 		})
+		return def.promise();
 	}
 
 	window.ajaxAPI = new SAUCAL_AJAX_API();
@@ -423,14 +718,38 @@
 		ajaxAPI.init();
 	})    
     
+	if(!!ajaxAPI.config.autoInit) {
+	    // Handle click event of all links with href not starting with http, https or #
+	    $(document).on('click', ajaxAPI.config.linkSelector, function(e){
+			var thisLink = $(this);
+			var evt = ajaxAPI.triggerWith("ajaxgetting", thisLink.prop("href"));
+			if(evt.isDefaultPrevented()) {
+		        e.preventDefault();
+		    } else {
+		    	if(ajaxAPI.hasToReplaceClick(thisLink) && !e.isDefaultPrevented() && ajaxAPI.historyApiSupported()){
+		        	e.preventDefault();
+			        ajaxAPI.load(thisLink, true);
+		    	};
+			}
+	    });
+	}
 
-    // Handle click event of all links with href not starting with http, https or #
-    $(document).on('click', 'a', function(e){
-    	if(ajaxAPI.hasToReplaceClick($(this)) && !e.isDefaultPrevented() && ajaxAPI.historyApiSupported()){
-	        e.preventDefault();
-	        ajaxAPI.load($(this), true);
-    	};
-    });
+	$.fn.triggerAjaxAPI = function() {
+		var def = $.Deferred();
+		this.promise = $.proxy( def.promise, def );
+		return this.on("click", function(e){
+			var thisLink = $(this);
+			var evt = ajaxAPI.triggerWith("ajaxgetting", thisLink.prop("href"));
+			if(evt.isDefaultPrevented()) {
+		        e.preventDefault();
+		    } else {
+				if(ajaxAPI.hasToReplaceClick(thisLink) && !e.isDefaultPrevented() && ajaxAPI.historyApiSupported()){
+		        	e.preventDefault();
+			        ajaxAPI.load(thisLink, true, def);
+		    	};
+		    }
+		});
+	}
 
     $(window).bind('popstate', function(event){
         // Ignore inital popstate that some browsers fire on page load
@@ -438,7 +757,23 @@
         ajaxAPI.popped = true;
         if (initialPop) return;
 
-        ajaxAPI.load(location.href, false);
+        var state = event.originalEvent.state;
+        if(state !== null && typeof state["ajaxAPI"] != undefined) {
+	        var ret = ajaxAPI.popState(state["ajaxAPI"].state, state["ajaxAPI"].title, location.href); 
+	        if(!ret.isPropagationStopped())
+	        	ajaxAPI.load(location.href, false);
+        } else if(state === null) {
+        	var ret;
+        	if(location.href == ajaxAPI.initialURL) {
+	        	ret = ajaxAPI.popState({}, ajaxAPI.initialTitle, ajaxAPI.initialURL); 
+		        if(!ret.isPropagationStopped())
+		        	ajaxAPI.load(location.href, false);
+        	} else {
+		        ajaxAPI.load(location.href, false).done(function(newContent){
+		        	ajaxAPI.replaceState({}, newContent.ajaxAPIData("title"), newContent.ajaxAPIData("url"));
+		        });
+        	}
+        }
     });
 })(jQuery)
 	

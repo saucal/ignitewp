@@ -11,6 +11,7 @@ function saucal_get_header(){
         ?>
         <div class="url-helper" style="display: none;"><?php echo get_permalink(get_queried_object_id()); ?></div>
         <div class="title-helper" style="display: none;"><?php wp_title(); ?></div>
+        <div <?php body_class("body-class-helper"); ?> style="display: none;"></div>
         <?php
         do_action("saucal_ajax_get_header");
     }
@@ -36,24 +37,14 @@ add_action( "wp_enqueue_scripts", function(){
         "contentSelector" => "#content",
         "menuSelector" => array(
             "menu" => "#header ul.menu",
-            "item" => "#header ul.menu li.menu-item"
+            "item" => "li.menu-item"
         ),
         "loader" => array(
             "show" => null,
             "hide" => null
         ),
-        "beforeBuffer" => "function(content){
-            return true;
-        }",
-        "changeBufferData" => "function(bufferData, content, ajaxBody){
-            return bufferData;
-        }",
-        "callbacks" => array(
-            "prevHideOldContent" => "function(){}",
-            "afterShow" => "function(){}",
-            "prevShow" => "function(){}",
-            "afterInitShow" => "function(){}"
-        )
+        "autoInit" => true,
+        "linkSelector" => "a"
     )));
     wp_enqueue_script( SAUCAL_TPL_ID."-ajax-api" );
 }, 100);
