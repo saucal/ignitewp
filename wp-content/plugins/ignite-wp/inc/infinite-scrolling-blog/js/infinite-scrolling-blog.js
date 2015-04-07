@@ -300,20 +300,28 @@
 			})
 			visible.addClass('onscreen').first().addClass('first').end().last().addClass('last');
 
-			var firstBounds = visible.first().getBounds();
-			if(firstBounds.top >= viewport.top && viewport.top <= firstBounds.bottom){
-				visible.first().addClass("scrolledPastTop");
-			}
+			if(visible.length > 0) {
+				var firstBounds = visible.first().getBounds();
+				if(firstBounds.top >= viewport.top && viewport.top <= firstBounds.bottom){
+					visible.first().addClass("scrolledPastTop");
+				}
 
-			var lastBounds = visible.last().getBounds();
-			if(lastBounds.bottom <= viewport.bottom){
-				visible.last().addClass("scrolledPastBottom");
-			}
+				var lastBounds = visible.last().getBounds();
+				if(lastBounds.bottom <= viewport.bottom){
+					visible.last().addClass("scrolledPastBottom");
+				}
 
-			if(viewport.bottom >= postscontainer.getBounds().bottom) {
-				visible.last().markInSidebar();
+				if(viewport.bottom >= postscontainer.getBounds().bottom) {
+					visible.last().markInSidebar();
+				} else {
+					visible.first().markInSidebar();
+				}
 			} else {
-				visible.first().markInSidebar();
+				if(viewport.top < postscontainer.getBounds().top) {
+					allPosts.first().hasClass('scrolledPastTop').markInSidebar();
+				} else if(viewport.bottom > postscontainer.getBounds().bottom) {
+					allPosts.last().addClass("scrolledPastBottom").markInSidebar();
+				}
 			}
 
 
