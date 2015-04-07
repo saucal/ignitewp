@@ -156,10 +156,9 @@ function infinite_blog_get_post_data_by_id($id){
 	$data["html"] = $conts;
 	if(class_exists("Saucal_Lazy_Load_Patcher")) {
 		$data["parsed_html"] = Saucal_Lazy_Load_Patcher::parse_lazy($data["html"]);
+		$data["html"] = $data["parsed_html"];
+		unset($data["parsed_html"]);
 	}
-	$data["html"] = $data["parsed_html"];
-	unset($data["parsed_html"]);
-
 	$wp_the_query = $oldTheQuery;
 	$wp_query = $oldQuery;
 	return $data;
