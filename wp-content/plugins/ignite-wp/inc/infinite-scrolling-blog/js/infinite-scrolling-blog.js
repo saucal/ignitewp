@@ -108,7 +108,12 @@
 		if(scrollingParent.is(":animated"))
 			return;
 
-		var id = $(this).getPostId();
+		var thisElem = $(this);
+
+		if(thisElem.length == 0)
+			return;
+
+		var id = thisElem.getPostId();
 		if(id) {
 			$(this).addClass('current').siblings().removeClass('current');
 			var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).children("#"+infiniteScrollConfig.prefixmenuitemid+id);
