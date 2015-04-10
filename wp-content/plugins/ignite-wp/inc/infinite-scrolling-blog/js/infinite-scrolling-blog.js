@@ -254,29 +254,85 @@
 		/**
 		Sidebar Scrolling
 		*/
+
+		var triggerLoading = function(){
+			setTimeout(function(){
+				sidebar.scroll();
+			}, 1);
+		}
+
 		sidebar.on("scroll", function() {
 			//console.error("scroll", sidebar.get(0));
 			if(sidebar.hasClass('no-more-posts'))
 				return;
 
+			var key = Math.random();
+			sidebar.data("ajax-key", key);
+
+
+
 			var nextPage = sidebar.data("page") + 1;
 			ajaxGet('get_sidebar', {
 				'page': nextPage,
-				'ignore': sidebar.data("ignore")
+				'ignore': sidebar.data("ignore"),
+				'filter': sidebar.data("filter") || ""
 			}, function(response){
+				if(sidebar.data("ajax-key") != key)
+					return;
 				if(response.length == 0) {
 					sidebar.addClass('no-more-posts');
 					return;
 				}
+
 				//append the items
 				$(infiniteScrollConfig.selectors.sidebaritemscont).append(response);
 				sidebar.data("page", nextPage);
 				sidebar.attr("data-page", nextPage);
-				setTimeout(function(){
-					sidebar.scroll();
-				}, 1);
+
+
+				if(nextPage == 1 && sidebar.data("ignore") === 0) {
+					var ignId = $(infiniteScrollConfig.selectors.sidebaritemscont).children().first().getPostId();
+					sidebar.data("ignore", ignId);
+					sidebar.attr("data-ignore", ignId);
+					//postscontainer.children().remove();
+					scrollingParent.off("infinite-loaded", triggerLoading).one("infinite-loaded", triggerLoading);
+					scrollingParent.off("infinite-scrolling-to.sidebar-search").one("infinite-scrolling-to.sidebar-search", function(e, post){
+						post.siblings().remove();
+					});
+					scrollingParent.trigger("load-single", [ignId]);
+					scrollingParent.trigger("scroll");
+				} else {
+					triggerLoading();
+				}
 			});
 		}).trigger("scroll");
+
+		sidebar.on("keyup", ".search-field", function(e){
+			var prev = $(this).data("prev-val") || "";
+
+			if(e.which == 13 || e.which == 27) {
+
+				if(e.which == 27) {
+					$(this).val("")
+				} else if (e.which == 13) {
+				}
+
+				var currVal = $(this).val();
+
+				if(prev == currVal)
+					return;
+
+				$(this).data("prev-val", currVal);
+
+				sidebar.data("ignore", 0);
+				sidebar.data("filter", currVal);
+				sidebar.data("ajax-key", "");
+				sidebar.removeClass('no-more-posts');
+				sidebar.data("page", 0);
+				$(infiniteScrollConfig.selectors.sidebaritemscont).html("");
+				sidebar.trigger("scroll");
+			}
+		})
 
 		/**
 		Blog Scrolling
@@ -415,7 +471,8 @@
 			var loaded = postscontainer.children("#post-"+id);
 			if(loaded.length > 0) {
 				loaded.markInSidebar();
-				scrollingParent.animate({
+				scrollingParent.trigger("infinite-scrolling-to", [loaded]);
+				scrollingParent.stop().animate({
 					"scrollTop": loaded.offset().top
 				}, 500).promise().done(function(){
 					loaded.markInSidebar(false);
