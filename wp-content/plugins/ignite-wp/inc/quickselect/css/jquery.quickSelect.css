@@ -1,0 +1,92 @@
+.qs, .qs * { 
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    text-shadow: none;
+}
+.qs-anchor {
+    display: inline-block;
+    vertical-align: bottom;
+    outline: none;
+}
+.qs {
+    position: relative;
+    display: inline-block;
+    vertical-align: bottom;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 18px;
+    margin: 2px;
+}
+.qs-fixed {
+    width: 100%;
+    border: 1px solid #a9a9a9;
+    border-radius: 2px;
+    padding: 0px 4px;
+    background: white;
+    color: black;
+}
+.qs-anchor:focus .qs-fixed{
+    outline-color: rgb(77, 144, 254);
+    outline-style: auto;
+    outline-width: 5px;
+}
+.qs-fixed:hover {
+    border-color: #7e7e7e;
+}
+.qs-viewport-arrow {
+    width: 100%;
+}
+.qs-viewport-container {
+    padding-right: 4px;
+}
+.qs-shadow-viewport {
+    height: 0px;
+    overflow: hidden;
+}
+.qs-viewport {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 100%;
+}
+.qs-arrow {
+    font-size: 9px;
+    line-height: 18px;
+    width: 11px;
+    float: right;
+    text-align: center;
+}
+.qs.open-above .qs-dropdown {
+    top: auto;
+    bottom: 100%;
+}
+.qs-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    width: 100%;
+    border: 1px solid #7f9db9;
+    overflow: auto;
+    z-index: 10;
+    background: white;
+    color: black;
+}
+.qs-option {
+    line-height: 18px;
+    padding: 0px 4px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.qs-option.hover {
+    background: #1e90ff;
+    color: white;
+}
