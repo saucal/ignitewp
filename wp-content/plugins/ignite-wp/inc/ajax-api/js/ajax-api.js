@@ -93,7 +93,7 @@
 	window.arrayClean = function(array){
 		var newArray = [];
 		for(var i=0;i<array.length;i++) {
-			if(!!array[i])
+			if(typeof array[i] != "undefined")
 				newArray.push(array[i]);
 		}
 		return newArray;
