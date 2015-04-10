@@ -642,6 +642,9 @@
 
 	SAUCAL_AJAX_API.prototype.switchTo = function(newContent) {
 		var currContent = $(ajaxAPI.config.contentSelector).first();
+		if(currContent.is(newContent))
+			return;
+
 		currContent.addClass('ajax-leaving');
 		newContent.addClass('ajax-entering');
 
