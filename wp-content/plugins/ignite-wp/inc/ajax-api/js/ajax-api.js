@@ -682,6 +682,10 @@
 		ajaxAPI.markLinks(href);
 
 		var currContent = $(ajaxAPI.config.contentSelector);
+		if(currContent.is(newContent)) {
+			def.resolveWith(newContent, [newContent]);
+			return def.promise();;
+		}
 
 		var effDef = $.Deferred();
 		var ret = thisAPI.triggerWith("prevHideOldContent", href, $(document), [newContent, currContent, effDef, def]);
