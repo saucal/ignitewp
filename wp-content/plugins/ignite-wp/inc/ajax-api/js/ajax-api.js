@@ -238,7 +238,34 @@
 	SAUCAL_AJAX_EVENTS.prototype.one = function(evt, url, fn) {
 		return this.attachEvt(evt, url, fn, true);
 	} 
-	SAUCAL_AJAX_EVENTS.prototype.triggerWith = function(evt, url, scope, params) {
+	SAUCAL_AJAX_EVENTS.prototype.eventTriggered = function(evt, elem) {
+		if(typeof elem.data("ajax_evts") == "undefined")
+			return false;
+
+		if(typeof elem.data("ajax_evts")[evt] == "undefined")
+			return false;
+
+		return true;
+	}
+	SAUCAL_AJAX_EVENTS.prototype.countTrigger = function(evt, elem) {
+		if(typeof elem.data("ajax_evts") == "undefined")
+			elem.data("ajax_evts", {})
+
+		var data = elem.data("ajax_evts");
+
+		if(typeof data[evt] == "undefined")
+			data[evt] = 0;
+
+		data[evt]++;
+	}
+	SAUCAL_AJAX_EVENTS.prototype.triggerWithOnce = function(evt, url, scope, params) {
+		return this.triggerWith.call(this, evt, url, scope, params, true);
+	}
+
+	SAUCAL_AJAX_EVENTS.prototype.triggerOnce = function(evt) {
+		return this.trigger.call(this, evt, true);
+	}
+	SAUCAL_AJAX_EVENTS.prototype.triggerWith = function(evt, url, scope, params, once) {
 		var eventObj;
 		if(typeof evt == "string") {
 			eventObj = jQuery.Event( evt );
@@ -271,10 +298,24 @@
 
 		params.unshift(eventObj);
 
+		if(!!once)
+			params.unshift(true);
+		else
+			params.unshift(false);
+
 		return this.trigger.apply(this, params);
 	}
-	SAUCAL_AJAX_EVENTS.prototype.trigger = function(evt) {
+	SAUCAL_AJAX_EVENTS.prototype.trigger = function(once, evt) {
 		var eventObj;
+		var fnParams;
+		if(typeof once != "boolean") {
+			fnParams = arrayClean(arguments).slice(1);
+			evt = once;
+			once = false;
+		} else {
+			fnParams = arrayClean(arguments).slice(2);
+		}
+
 		if(typeof evt == "string") {
 			eventObj = jQuery.Event( evt );
 		} else {
@@ -282,12 +323,20 @@
 			evt = evt.type;
 		}
 
-		var fnParams = arrayClean(arguments).slice(1);
 		fnParams.unshift(eventObj);
 
 		var fnScope = this.defaultScope;
 		if(typeof eventObj.targetScope != "undefined")
 			fnScope = eventObj.targetScope;
+
+		if(!!once && typeof fnScope.data != "undefined") {
+			if(this.eventTriggered(evt, fnScope)){
+				this.countTrigger(evt, fnScope);
+				return;
+			}
+		}
+
+		this.countTrigger(evt, fnScope);
 
 		if(typeof this.events[evt] != "undefined") {
 			var url;
@@ -307,8 +356,10 @@
 			}
 		}
 
-		if(typeof fnScope["trigger"] != "undefined")
-			fnScope.trigger(eventObj, arrayClean(arguments).slice(1));
+		if(typeof fnScope["trigger"] != "undefined") {
+			fnParams.shift();
+			fnScope.trigger(eventObj, fnParams);
+		}
 
 		return eventObj;
 	}
@@ -387,6 +438,8 @@
 	    this.one = $.proxy(this.globalEvents.one, this.globalEvents);
 	    this.trigger = $.proxy(this.globalEvents.trigger, this.globalEvents);
 	    this.triggerWith = $.proxy(this.globalEvents.triggerWith, this.globalEvents);
+	    this.triggerOnce = $.proxy(this.globalEvents.triggerOnce, this.globalEvents);
+	    this.triggerWithOnce = $.proxy(this.globalEvents.triggerWithOnce, this.globalEvents);
 
 	    this.config = $.extend(true, {}, {
 	    	contentSelector: "#content",
