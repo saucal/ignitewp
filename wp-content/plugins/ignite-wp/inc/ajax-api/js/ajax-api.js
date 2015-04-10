@@ -152,7 +152,7 @@
 			return !!$(this).ajaxAPIData("is-main-alias");
 		});
 		var thisUrlAliases = mainAliases.filter(function(){
-			return clearHashFromURL($(this).data("ajax-alias")) == clearHashFromURL(url)
+			return compareURLs(clearHashFromURL($(this).data("ajax-alias")), clearHashFromURL(url));
 		});
 		return thisUrlAliases;
 	}
@@ -165,7 +165,7 @@
 				return aliasesVisible.first().ajaxAPIData("aliasing-as", clearHashFromURL(url));
 			else //if we didn't find aliases, go with the standard search
 				return this.buffer.filter(function(){
-					return $(this).ajaxAPIData("url") === clearHashFromURL(url);
+					return compareURLs(clearHashFromURL($(this).ajaxAPIData("url")), clearHashFromURL(url));
 				});
 		}
 	}
