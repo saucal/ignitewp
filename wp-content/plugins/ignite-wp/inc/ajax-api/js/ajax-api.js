@@ -523,6 +523,7 @@
     	this.triggerWith("showingPage", content, [content]);
 		this.triggerWithOnce("contentReady", location.href, content, [content] );
 		this.triggerWith("contentLoad", content, [content]);
+		this.triggerWithOnce( "contentFirstLoad", content, [content] );
     }
     SAUCAL_AJAX_API.prototype.markLinks = function(href){
 		$(ajaxAPI.config.menuSelector.item+" a").each(function(){
@@ -710,6 +711,7 @@
 
 			currContent.detach();
 			ajaxAPI.triggerWith( "contentLoad", href, newContent, [newContent] );
+			ajaxAPI.triggerWithOnce( "contentFirstLoad", href, newContent, [newContent] );
 			newContent.fadeIn(200, function(){
 				ajaxAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
 			});
@@ -752,6 +754,7 @@
 			thisAPI.triggerWithOnce( "contentReady", href, newContent, [newContent] );
 			currContent.detach();
 			thisAPI.triggerWith( "contentLoad", href, newContent, [newContent] );
+			thisAPI.triggerWithOnce( "contentFirstLoad", href, newContent, [newContent] );
 			newContent.fadeIn(200, function(){
 				thisAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
 				def.resolveWith(newContent, [newContent]);
