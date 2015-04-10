@@ -7,7 +7,7 @@ add_action("init", function(){
 	$infiniteScrollConfig = apply_filters( "infinite-scroll-config", array(
 		"selectors" => array(
 			"sidebar" => "#blog-sidebar",
-			"sidebaritemscont" => "#blog-sidebar ul",
+			"sidebaritemscont" => "#blog-sidebar > ul",
 			"blogarea" => "#blog-area",
 			"postscontainer" => "#blog-contents",
 		),
