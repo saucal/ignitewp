@@ -521,8 +521,7 @@
     	var content = $(this.config.contentSelector);
     	contentBuffer.add(content);
     	this.triggerWith("showingPage", content, [content]);
-    	this.triggerWith("contentReady", content, [content]);
-		content.ajaxAPIData("contentAlreadyLoaded", true);
+		this.triggerWithOnce("contentReady", location.href, content, [content] );
 		this.triggerWith("contentLoad", content, [content]);
     }
     SAUCAL_AJAX_API.prototype.markLinks = function(href){
@@ -750,10 +749,7 @@
 				}
 			}
 
-			if(!newContent.ajaxAPIData("contentAlreadyLoaded")) {
-				thisAPI.triggerWith( "contentReady", href, newContent, [newContent] );
-				newContent.ajaxAPIData("contentAlreadyLoaded", true);
-			}
+			thisAPI.triggerWithOnce( "contentReady", href, newContent, [newContent] );
 			currContent.detach();
 			thisAPI.triggerWith( "contentLoad", href, newContent, [newContent] );
 			newContent.fadeIn(200, function(){
