@@ -1,4 +1,6 @@
 <?php
+add_ignite_support("history-api-helper");
+
 if((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') || isset($_REQUEST["iframed"])) {
     define("SAUCAL_IS_AJAX_REQUEST", true);
 } else {

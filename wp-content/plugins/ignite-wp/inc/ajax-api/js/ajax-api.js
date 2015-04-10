@@ -463,60 +463,6 @@
 	SAUCAL_AJAX_API.prototype.setup = function(_config){
 		this.config = $.extend(true, this.config, _config);
 	}
-
-	SAUCAL_AJAX_API.prototype.historyApiSupported = function(){
-		return !!(window.history && history.pushState);
-	}
-	SAUCAL_AJAX_API.prototype.pushState = function(state, title, href){
-    	var evt = this.triggerWith("saucal_pushstate", href);
-    	if(this.historyApiSupported() && !evt.isDefaultPrevented()){
-    		history.pushState({
-    			ajaxAPI: {
-    				state: state,
-    				title: title
-				}
-			}, title, href);
-    		document.title = title;
-    		this.analyticsPush(title, href);
-    		this.popped = true;
-    	}
-    	return evt;
-    }
-    SAUCAL_AJAX_API.prototype.replaceState = function(state, title, href){
-    	var evt = this.triggerWith("saucal_replacestate", href);
-    	if(this.historyApiSupported() && !evt.isDefaultPrevented()){
-    		history.replaceState({
-    			ajaxAPI: {
-    				state: state,
-    				title: title
-				}
-			}, title, href);
-    		document.title = title;
-    		this.analyticsPush(title, href);
-    	}
-    	return evt;
-    }
-    SAUCAL_AJAX_API.prototype.popState = function(state, title, href) {
-    	var evt = this.triggerWith("saucal_popstate", href);
-    	if(this.historyApiSupported() && !evt.isDefaultPrevented()){
-    		document.title = title;
-    		this.analyticsPush(title, href);
-    	}
-    	return evt;
-    }
-    SAUCAL_AJAX_API.prototype.analyticsPush = function(title, url) {
-    	var loc = getLocationObject(url);
-    	var analyticsPath = loc.pathname + loc.search + loc.hash;
-		if(typeof ga != "undefined") {
-			ga('send', 'pageview', {
-				'page': analyticsPath,
-				'title': title
-			});
-		}
-		if(typeof _gaq != "undefined") {
-			_gaq.push(['_trackPageview', analyticsPath]);
-		}
-    }
     SAUCAL_AJAX_API.prototype.init = function(){
     	var content = $(this.config.contentSelector);
     	contentBuffer.add(content);
@@ -744,7 +690,7 @@
 			var e = thisAPI.triggerWith( "showingPage", href, newContent, [newContent] );
 			if(!e.isDefaultPrevented()){
 				if(doPush) 
-					ajaxAPI.pushState({}, newContent.ajaxAPIData("title"), href);
+					historyAPI.pushState({}, newContent.ajaxAPIData("title"), href);
 
 				if(!!newContent.ajaxAPIData("bodyClass")) {
 					$("body").attr("class", newContent.ajaxAPIData("bodyClass"));
@@ -778,7 +724,7 @@
 			if(evt.isDefaultPrevented()) {
 		        e.preventDefault();
 		    } else {
-		    	if(ajaxAPI.hasToReplaceClick(thisLink) && !e.isDefaultPrevented() && ajaxAPI.historyApiSupported()){
+		    	if(ajaxAPI.hasToReplaceClick(thisLink) && !e.isDefaultPrevented() && historyAPI.historyApiSupported()){
 		        	e.preventDefault();
 			        ajaxAPI.load(thisLink, true);
 		    	};
@@ -795,7 +741,7 @@
 			if(evt.isDefaultPrevented()) {
 		        e.preventDefault();
 		    } else {
-				if(ajaxAPI.hasToReplaceClick(thisLink) && !e.isDefaultPrevented() && ajaxAPI.historyApiSupported()){
+				if(ajaxAPI.hasToReplaceClick(thisLink) && !e.isDefaultPrevented() && historyAPI.historyApiSupported()){
 		        	e.preventDefault();
 			        ajaxAPI.load(thisLink, true, def);
 		    	};
@@ -803,29 +749,17 @@
 		});
 	}
 
-    $(window).bind('popstate', function(event){
-        // Ignore inital popstate that some browsers fire on page load
-        var initialPop = !ajaxAPI.popped && location.href == ajaxAPI.initialURL;
-        ajaxAPI.popped = true;
-        if (initialPop) return;
-
-        var state = event.originalEvent.state;
-        if(state !== null && typeof state["ajaxAPI"] != undefined) {
-	        var ret = ajaxAPI.popState(state["ajaxAPI"].state, state["ajaxAPI"].title, location.href); 
-	        if(!ret.isPropagationStopped())
+	historyAPI.on("popstate", function(e, state, title, url) {
+		if(state !== null && title !== null) {
+			var evt = ajaxAPI.triggerWith("saucal_popstate", url, [state, title, url]);
+			if(!evt.isPropagationStopped())
 	        	ajaxAPI.load(location.href, false);
-        } else if(state === null) {
-        	var ret;
-        	if(location.href == ajaxAPI.initialURL) {
-	        	ret = ajaxAPI.popState({}, ajaxAPI.initialTitle, ajaxAPI.initialURL); 
-		        if(!ret.isPropagationStopped())
-		        	ajaxAPI.load(location.href, false);
-        	} else {
-		        ajaxAPI.load(location.href, false).done(function(newContent){
-		        	ajaxAPI.replaceState({}, newContent.ajaxAPIData("title"), newContent.ajaxAPIData("url"));
-		        });
-        	}
-        }
-    });
+		} else {
+			e.preventDefault();
+			ajaxAPI.load(location.href, false).done(function(newContent){
+	        	historyAPI.replaceState({}, newContent.ajaxAPIData("title"), newContent.ajaxAPIData("url"));
+	        });
+		}
+	});
 })(jQuery)
 	
