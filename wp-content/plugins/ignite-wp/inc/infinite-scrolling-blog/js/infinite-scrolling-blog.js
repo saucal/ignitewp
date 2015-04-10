@@ -171,9 +171,12 @@
 	/**
 	Initialization
 	*/
-	$(document).on("contentReady", function(){
+	$(document).on("contentFirstLoad ready", function(e){
+		/*if(e.target !== document) {
+			console.log(e.target);
+		}*/
 		var blogarea = $(infiniteScrollConfig.selectors.blogarea);
-		if(blogarea.data("blog-initialized")) 
+		if(blogarea.data("blog-initialized") || blogarea.length == 0) 
 			return;
 
 		blogarea.data("blog-initialized", true)
@@ -436,9 +439,6 @@
 		});
 	});
 
-	$(function(){
-		$(document).trigger("contentReady");
-	});
 
 	$(window).bind('popstate', function(e){
 		var event = e.originalEvent;
