@@ -313,7 +313,7 @@
 				var bounds = $(this).getBounds();
 				var checkPos = [bounds.top, bounds.bottom];
 				for(var i = 0; i<checkPos.length; i++) {
-					if(checkPos[i] >= viewport.top && checkPos[i] <= viewport.bottom) {
+					if(checkPos[i] > viewport.top && checkPos[i] <= viewport.bottom) {
 						return true;
 					}
 				}
