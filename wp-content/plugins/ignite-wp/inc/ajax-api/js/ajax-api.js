@@ -642,6 +642,9 @@
 
 	SAUCAL_AJAX_API.prototype.switchTo = function(newContent) {
 		var currContent = $(ajaxAPI.config.contentSelector).first();
+		currContent.addClass('ajax-leaving');
+		newContent.addClass('ajax-entering');
+
 		var effDef = ajaxAPI.config.animDefGet(newContent, currContent);
 		var href = newContent.ajaxAPIData("url");
 		effDef.done(function(){
@@ -660,6 +663,7 @@
 			ajaxAPI.triggerWithOnce( "contentFirstLoad", href, newContent, [newContent] );
 			newContent.fadeIn(200, function(){
 				ajaxAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+				currContent.add(newContent).removeClass('ajax-leaving ajax-entering');
 			});
 			ajaxAPI.triggerWith( "afterInitShow", href, newContent, [newContent] );
 		})
@@ -681,6 +685,11 @@
 		if(ret.isDefaultPrevented()) {
 			return def.promise();
 		}
+
+
+		currContent.addClass('ajax-leaving');
+		newContent.addClass('ajax-entering');
+
 		effDef = ajaxAPI.config.animDefGet(newContent, currContent);
 
 		effDef.done(function(){
@@ -703,6 +712,7 @@
 			thisAPI.triggerWithOnce( "contentFirstLoad", href, newContent, [newContent] );
 			newContent.fadeIn(200, function(){
 				thisAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+				currContent.add(newContent).removeClass('ajax-leaving ajax-entering');
 				def.resolveWith(newContent, [newContent]);
 			});
 			thisAPI.triggerWith( "afterInitShow", href, newContent, [newContent] );
