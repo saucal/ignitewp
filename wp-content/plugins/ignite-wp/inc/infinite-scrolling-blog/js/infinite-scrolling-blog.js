@@ -442,19 +442,42 @@
 				scrollingParent.trigger("load-single", [id]);
 			}
 		});
-	});
 
+		var goToPost = function(post_id){
+			var postscontainer = $(infiniteScrollConfig.selectors.postscontainer);
+			var scrollingParent = postscontainer.getScrollingParent();
+			scrollingParent.trigger("load-single", [post_id]);
+		}
 
-	$(window).bind('popstate', function(e){
-		var event = e.originalEvent;
-		if(event.state === null || typeof event.state["blog_post_id"] == "undefined")
-			return;
+		if(typeof ajaxAPI != "undefined") {
 
-		var postscontainer = $(infiniteScrollConfig.selectors.postscontainer);
-		var scrollingParent = postscontainer.getScrollingParent();
+			var baseURL = postscontainer.closest(ajaxAPI.config.contentSelector).data("ajax-alias");
 
-		var post_id = event.state["blog_post_id"];
-		scrollingParent.trigger("load-single", [post_id]);
-		e.stopImmediatePropagation()
+			ajaxAPI.on("saucal_popstate", function(e, state) {
+				if(state === null || typeof state["blog_post_id"] == "undefined")
+					return;
+
+				e.stopPropagation();
+
+				var currentContent = $(ajaxAPI.config.contentSelector);
+				ajaxAPI.getPage(baseURL).done(function(buffer){
+					if(buffer.is(currentContent)) {
+						goToPost(state["blog_post_id"]);
+					} else {
+						ajaxAPI.switchTo(buffer);
+						ajaxAPI.one("contentLoad", function(e){
+							goToPost(state["blog_post_id"]);
+						});
+					}
+				});
+			});
+		} else {
+			historyAPI.on("popstate", function(e, state){
+				if(state === null || typeof state["blog_post_id"] == "undefined")
+					return;
+
+				goToPost(event.state["blog_post_id"]);
+			})
+		}
 	});
 })(jQuery);

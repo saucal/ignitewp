@@ -1,5 +1,6 @@
 <?php
 add_ignite_support("ajax-request");
+add_ignite_support("history-api-helper");
 
 add_action("init", function(){
 	wp_register_script( "saucal-infinite-scrolling-blog", SAUCAL_TPL_LIB_URL(__FILE__)."/js/infinite-scrolling-blog.js", array("jquery"), "1.0", false );
