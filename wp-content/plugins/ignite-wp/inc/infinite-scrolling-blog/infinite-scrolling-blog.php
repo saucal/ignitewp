@@ -34,6 +34,7 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 		"ignore" => array(),
 		"posts_per_page" => $infiniteScrollConfig["posts_in_sidebar"],
 		"fields" => "posts",
+		"filter" => ""
 	);
 	$attrs = array_merge($defaults, $attrs);
 	$attrs = array_merge($attrs, $_REQUEST);
@@ -60,6 +61,11 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 	}
 	$ignore = $attrs["ignore"];
 	unset($attrs["ignore"]);
+
+	if(!empty($attrs["filter"])) {
+		$attrs["s"] = $attrs["filter"];
+	}
+	unset($attrs["filter"]);
 
 	$posts = get_posts($attrs);
 	if(is_single() && $page == 1){
@@ -208,6 +214,14 @@ function infinite_scrolling_sidebar_item_attr() {
 	}
 	if(isset($post->wp_title)){
 		echo 'data-wptitle="'.esc_attr($post->wp_title).'" ';
+	}
+}
+
+function infinite_scrolling_search_field_attr() {
+	global $wp_query;
+	echo 'placeholder="Type then press ENTER to filter..." ';
+	if(!empty($wp_query->query_vars["s"])) {
+		echo 'value="'.esc_attr($wp_query->get("s")).'" ';
 	}
 }
 ?>
