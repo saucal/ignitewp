@@ -282,10 +282,20 @@
 		Blog Scrolling
 		*/
 		var lastScroll = scrollingParent.getViewport();
+		var scrollingAfterPopstate = false;
+		historyAPI.on("popstate", function() {
+			scrollingAfterPopstate = true;
+		})
+
 		scrollingParent.on("scroll", function(){
 			//console.error("scroll", scrollingParent.get(0));
 			if(!blogarea.is(":visible"))
 				return;
+
+			if(typeof ajaxAPI != "undefined") {
+				if(blogarea.closest(ajaxAPI.config.contentSelector).hasClass('ajax-leaving'))
+					return;
+			}
 
 			var viewport = scrollingParent.getViewport();
 			var allPosts = postscontainer.children();
@@ -326,15 +336,15 @@
 				}
 
 				if(viewport.bottom >= postscontainer.getBounds().bottom) {
-					visible.last().markInSidebar();
+					visible.last().markInSidebar(!scrollingAfterPopstate);
 				} else {
-					visible.first().markInSidebar();
+					visible.first().markInSidebar(!scrollingAfterPopstate);
 				}
 			} else {
 				if(viewport.top < postscontainer.getBounds().top) {
-					allPosts.first().hasClass('scrolledPastTop').markInSidebar();
+					allPosts.first().addClass('scrolledPastTop').markInSidebar(!scrollingAfterPopstate);
 				} else if(viewport.bottom > postscontainer.getBounds().bottom) {
-					allPosts.last().addClass("scrolledPastBottom").markInSidebar();
+					allPosts.last().addClass("scrolledPastBottom").markInSidebar(!scrollingAfterPopstate);
 				}
 			}
 
@@ -366,6 +376,8 @@
 
 			// Set Variables for next calls
 			lastScroll = scrollingParent.getViewport();
+
+			scrollingAfterPopstate = false;
 		}).trigger("scroll"); // trigger the first scroll;
 
 		scrollingParent.onElementResize(function(){
@@ -406,7 +418,7 @@
 				scrollingParent.animate({
 					"scrollTop": loaded.offset().top
 				}, 500).promise().done(function(){
-					loaded.markInSidebar();
+					loaded.markInSidebar(false);
 				});
 			} else {
 				getPost(id, function(response){
