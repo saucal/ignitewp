@@ -1,10 +1,41 @@
 <?php
-global $SUISC_perc;
-$SUISC_perc = 0;
+
+class SUISC_stack {
+    var $perc = 0;
+    var $countStrikes = array(array());
+}
+
+global $SUISC_stack;
+$SUISC_stack = array();
+
+function SUISC_getCurrStack() {
+    global $SUISC_stack;
+    $last = array_values($SUISC_stack);
+    $last = array_pop($last);
+
+    if($last)
+        return $last;
+    else
+        return false;
+}
+
+function SUISC_removeFromStack() {
+    global $SUISC_stack;
+    array_pop($SUISC_stack);
+}
+
+function SUISC_addNewStack() {
+    global $SUISC_stack;
+    array_push($SUISC_stack, new SUISC_stack());
+}
 
 function SUISC_printElem($str, $atts, $cols, $totalCols){
-    global $SUISC_perc;
-    global $SUISC_countStrikes;
+    $currStack = SUISC_getCurrStack();
+    if(!$currStack)
+        return "";
+
+    $SUISC_perc = &$currStack->perc;
+    $SUISC_countStrikes = &$currStack->countStrikes;
 
     $thisPerc = $cols/$totalCols*100;
 
@@ -65,7 +96,7 @@ function SUISC_printElem($str, $atts, $cols, $totalCols){
 		$additionalClass[] = $atts['class'];
 
 
-    $ret .= "<div class='".$tagClass." sc-column ".implode(" ", $additionalClass)."'>".$str."</div>";
+    $ret .= "<div class='".$tagClass." sc-column ".implode(" ", $additionalClass)."'>".do_shortcode($str)."</div>";
 
     if(in_array("last", $additionalClass))
         $ret .= '</div>';
@@ -74,17 +105,18 @@ function SUISC_printElem($str, $atts, $cols, $totalCols){
 }
 
 function SUISC_resetPercCount($content){
-    global $SUISC_perc, $SUISC_countStrikes;
-    $SUISC_perc = 0;
-    $SUISC_countStrikes = array(array());
+    SUISC_removeFromStack();
     return $content;
 }
 
-global $SUISC_countStrikes;
-$SUISC_countStrikes = array(array());
-
 function SUISC_count($m) {
-    global $SUISC_countStrikes;
+    $currStack = SUISC_getCurrStack();
+    if(!$currStack)
+        return "";
+
+    $SUISC_perc = &$currStack->perc;
+    $SUISC_countStrikes = &$currStack->countStrikes;
+
     if(in_array($m[2], array("one-full", "one-half", "one-third", "one-fourth", "two-third", "two-fourth", "three-fourth"))){
         end($SUISC_countStrikes); 
         $elem = &$SUISC_countStrikes[key($SUISC_countStrikes)];
@@ -96,6 +128,8 @@ function SUISC_count($m) {
 }
 
 function SUISC_preFlight($content) {
+    SUISC_addNewStack();
+
     global $shortcode_tags;
 
     if ( false === strpos( $content, '[' ) ) {
@@ -113,42 +147,44 @@ function SUISC_preFlight($content) {
 }
 
 add_filter("the_content", "SUISC_preFlight", 9);
+add_filter("acf_the_content", "SUISC_preFlight", 9);
 
 add_filter("the_content", "SUISC_resetPercCount", 12); //This resets the percentage fill count to 0 after the shortcodes has been executed.
+add_filter("acf_the_content", "SUISC_resetPercCount", 12); //This resets the percentage fill count to 0 after the shortcodes has been executed.
 
 add_shortcode( "one-full", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
-    return SUISC_printElem(do_shortcode($cont), $atts, 1, 1);
+    return SUISC_printElem($cont, $atts, 1, 1);
 });
 
 add_shortcode( "one-half", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
-    return SUISC_printElem(do_shortcode($cont), $atts, 1, 2);
+    return SUISC_printElem($cont, $atts, 1, 2);
 });
 
 add_shortcode( "one-third", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
-    return SUISC_printElem(do_shortcode($cont), $atts, 1, 3);
+    return SUISC_printElem($cont, $atts, 1, 3);
 });
 
 add_shortcode( "two-third", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
-    return SUISC_printElem(do_shortcode($cont), $atts, 2, 3);
+    return SUISC_printElem($cont, $atts, 2, 3);
 });
 
 add_shortcode( "one-fourth", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
-    return SUISC_printElem(do_shortcode($cont), $atts, 1, 4);
+    return SUISC_printElem($cont, $atts, 1, 4);
 });
 
 add_shortcode( "two-fourth", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
-    return SUISC_printElem(do_shortcode($cont), $atts, 2, 4);
+    return SUISC_printElem($cont, $atts, 2, 4);
 });
 
 add_shortcode( "three-fourth", function($atts, $cont = NULL){
     if(empty($atts)) $atts = array();
-    return SUISC_printElem(do_shortcode($cont), $atts, 3, 4);
+    return SUISC_printElem($cont, $atts, 3, 4);
 });
 
 ?>
