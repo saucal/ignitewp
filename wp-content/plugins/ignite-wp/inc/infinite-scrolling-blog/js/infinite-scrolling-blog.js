@@ -186,6 +186,7 @@
 		/*if(e.target !== document) {
 			console.log(e.target);
 		}*/
+
 		var blogarea = $(infiniteScrollConfig.selectors.blogarea);
 		if(blogarea.data("blog-initialized") || blogarea.length == 0) 
 			return;
@@ -275,7 +276,8 @@
 			ajaxGet('get_sidebar', {
 				'page': nextPage,
 				'ignore': sidebar.data("ignore"),
-				'filter': sidebar.data("filter") || ""
+				'filter': sidebar.data("filter") || "",
+				'order': sidebar.data("order") || ""
 			}, function(response){
 				if(sidebar.data("ajax-key") != key)
 					return;
@@ -334,6 +336,17 @@
 			}
 		})
 
+		sidebar.on("change", ".order-field", function(e){
+			var currVal = $(this).val();
+			sidebar.data("ignore", 0);
+			sidebar.data("order", currVal);
+			sidebar.data("ajax-key", "");
+			sidebar.removeClass('no-more-posts');
+			sidebar.data("page", 0);
+			$(infiniteScrollConfig.selectors.sidebaritemscont).html("");
+			sidebar.trigger("scroll");
+		})
+
 		/**
 		Blog Scrolling
 		*/
@@ -343,7 +356,10 @@
 			scrollingAfterPopstate = true;
 		})
 
-		scrollingParent.on("scroll", function(){
+		scrollingParent.on("scroll", function(e){
+			if(!$(e.target).is(scrollingParent))
+				return;
+
 			//console.error("scroll", scrollingParent.get(0));
 			if(!blogarea.is(":visible"))
 				return;

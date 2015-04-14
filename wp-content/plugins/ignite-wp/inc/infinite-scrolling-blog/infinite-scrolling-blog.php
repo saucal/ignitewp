@@ -35,11 +35,14 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 		"ignore" => array(),
 		"posts_per_page" => $infiniteScrollConfig["posts_in_sidebar"],
 		"fields" => "posts",
-		"filter" => ""
+		"filter" => "",
+		"order" => "date_desc",
 	);
 	$attrs = array_merge($defaults, $attrs);
 	$attrs = array_merge($attrs, $_REQUEST);
 	$attrs = array_intersect_key($attrs, $defaults);
+
+	$attrs["suppress_filters"] = false;
 
 	if(!empty($attrs["ignore"]) && !is_array($attrs["ignore"])){
 		$attrs["ignore"] = array($attrs["ignore"]);
@@ -67,6 +70,29 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 		$attrs["s"] = $attrs["filter"];
 	}
 	unset($attrs["filter"]);
+
+	switch (strtolower($attrs["order"])) {
+		case 'popular_asc':
+			$attrs["order"] = "ASC";
+			$attrs["orderby"] = "popularity";
+			break;
+
+		case 'popular_desc':
+			$attrs["order"] = "DESC";
+			$attrs["orderby"] = "popularity";
+			break;
+
+		case 'date_asc':
+			$attrs["order"] = "ASC";
+			$attrs["orderby"] = "post_date";
+			break;
+		
+		case 'date_desc':
+		default:
+			$attrs["order"] = "DESC";
+			$attrs["orderby"] = "post_date";
+			break;
+	}
 
 	$posts = get_posts($attrs);
 	if(is_single() && $page == 1){
