@@ -203,7 +203,10 @@ function infinite_blog_get_post_by_id() {
 		$post = get_post($id);
 		$classes[] = $post->post_type;
 		return $classes;
-	}, 10, 3);
+	}, 10, 3);	
+
+	if(empty($_REQUEST["req"]))
+		$_REQUEST["req"] = "scroll";
 
 	echo json_encode(infinite_blog_get_post_data_by_id($_REQUEST["post_id"]));
 	exit;

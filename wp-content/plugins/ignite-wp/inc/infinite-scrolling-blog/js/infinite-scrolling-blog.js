@@ -166,8 +166,14 @@
 		}
 	}
 
-	var getPost = function(id, cb){
-		ajaxGetJSON('get_post_by_id', 'post_id='+ id , function(){
+	var getPost = function(id, cb, req){
+		if(typeof req == "undefined")
+			req = "scroll";
+
+		ajaxGetJSON('get_post_by_id', {
+			'post_id': id,
+			'req': req
+		}, function(){
 			var json = arguments[1];
 			if(typeof json === "object") {
 				var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).children("#"+infiniteScrollConfig.prefixmenuitemid+id);
@@ -517,7 +523,7 @@
 
 					//scrolltop
 					scrollingParent.scrollTop(postLoaded.offset().top);
-				});
+				}, "single");
 			}
 		})
 		.on("infinite-loaded", function(e, elem){
