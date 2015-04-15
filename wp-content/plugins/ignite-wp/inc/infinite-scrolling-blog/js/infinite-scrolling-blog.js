@@ -122,6 +122,9 @@
 			var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).children("#"+infiniteScrollConfig.prefixmenuitemid+id);
 			menuItem.addClass('current').siblings().removeClass('current');
 
+			if(menuItem.length == 0)
+				return;
+
 			if(doPush) {
 				var title = menuItem.data("wptitle");
 				var permalink = menuItem.data("permalink");
