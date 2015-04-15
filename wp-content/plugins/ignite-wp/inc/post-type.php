@@ -220,6 +220,8 @@ if(!class_exists("SaucalCMB")){
 				unset($field["name"]);
 				unset($field["type"]);
 
+				$addAfterFields = array();
+
 				$defaults = array();
 				switch ($newField["type"]) {
 					case 'text':
@@ -328,6 +330,15 @@ if(!class_exists("SaucalCMB")){
 						);
 						break;
 
+					case "tab":
+						$addAfterFields = $this->parse_fields_recursive($field["fields"], $thisFieldKey);
+						unset($field["fields"]);
+						$field["name"] = "";
+						$defaults = array(
+							'placement' => 'left',
+						);
+						break;
+
 					default:
 						# code...
 						break;
@@ -337,6 +348,12 @@ if(!class_exists("SaucalCMB")){
 				$newField = array_merge($newField, $field);
 				
 				$fields[] = $newField;
+
+				if(!empty($addAfterFields)) {
+					foreach($addAfterFields as $_field) {
+						$fields[] = $_field;
+					}
+				}
 			}
 			return $fields;
 		}
