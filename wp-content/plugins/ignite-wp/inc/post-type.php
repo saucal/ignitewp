@@ -346,7 +346,6 @@ if(!class_exists("SaucalCMB")){
 			$defaults = array(
 				"title" => "Meta Box",
 				"fields" => array(),
-				"position" => "normal",
 			);
 			foreach($this->opts["meta_boxes"] as $box_id => $box){
 				$box = array_merge($defaults, $box);
@@ -384,12 +383,15 @@ if(!class_exists("SaucalCMB")){
 					'fields' => $this->parse_fields_recursive($box["fields"], "field_".$thisBoxId),
 					'location' => $display_condition,
 					'options' => array(
-						'position' => $box["position"],
+						'position' => "normal",
 						'layout' => 'default',
 						'hide_on_screen' => array(),
 						'label_placement' => 'left',
 					),
 				);
+
+				$metaData["options"] = array_merge($metaData["options"], array_intersect_key($box, $metaData["options"]));
+
 				$boxes[] = $metaData;
 			}
 			return $boxes;
