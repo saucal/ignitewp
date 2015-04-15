@@ -313,6 +313,11 @@ if(!class_exists("SaucalCMB")){
 						);
 						break;
 
+					case "color_picker":
+						$defaults = array(
+							'default_value' => '',
+						);
+						break;
 					default:
 						# code...
 						break;
