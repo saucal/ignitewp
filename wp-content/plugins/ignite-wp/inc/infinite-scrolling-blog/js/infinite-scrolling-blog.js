@@ -125,6 +125,10 @@
 			if(doPush) {
 				var title = menuItem.data("wptitle");
 				var permalink = menuItem.data("permalink");
+				var evt = eventHandler.trigger("infinite-pushing-state", id, postscontainer.children("#post-"+id));
+				if(evt.isDefaultPrevented()) {
+					return;
+				}
 				var state = $.extend(true, {}, historyAPI.getState(), {
 					blog_post_id: id
 				});
@@ -180,6 +184,12 @@
 	}
 
 	/**
+	Event handling
+	*/
+
+	var eventHandler;
+
+	/**
 	Initialization
 	*/
 	$(document).on("contentFirstLoad ready", function(e){
@@ -190,6 +200,8 @@
 		var blogarea = $(infiniteScrollConfig.selectors.blogarea);
 		if(blogarea.data("blog-initialized") || blogarea.length == 0) 
 			return;
+
+		eventHandler = new SAUCAL_AJAX_EVENTS($(document));
 
 		blogarea.data("blog-initialized", true)
 		var postscontainer = $(infiniteScrollConfig.selectors.postscontainer);
