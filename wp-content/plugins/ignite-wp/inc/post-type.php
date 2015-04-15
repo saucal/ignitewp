@@ -318,6 +318,16 @@ if(!class_exists("SaucalCMB")){
 							'default_value' => '',
 						);
 						break;
+
+					case "repeater":
+						$field["sub_fields"] = $this->parse_fields_recursive($field["fields"], $thisFieldKey);
+						unset($field["fields"]);
+						$defaults = array(
+							'layout' => 'row',
+							'button_label' => 'Add Row',
+						);
+						break;
+
 					default:
 						# code...
 						break;
