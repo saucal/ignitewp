@@ -1,6 +1,15 @@
 (function($){
+	$.fn.ajaxAPIDataProxy = function(obj) {
+		return this.data("ajaxAPIProxy", obj);
+	}
 	$.fn.ajaxAPIData = function(prop, val) {
-		var data = this.data("ajaxAPI");
+		var data = this.data("ajaxAPIProxy");
+		if(typeof data == "undefined")
+			data = this.data("ajaxAPI");
+		else
+			data = data.data("ajaxAPI"); //get data from the proxied elem
+
+
 		if(!data){
 			data = {}
 			this.data("ajaxAPI", data);
