@@ -166,6 +166,8 @@
 			else //if we didn't find aliases, go with the standard search
 				return this.buffer.filter(function(){
 					return compareURLs(clearHashFromURL($(this).ajaxAPIData("url")), clearHashFromURL(url));
+				}).each(function(){
+					$(this).ajaxAPIData("aliasing-as", false);
 				});
 		}
 	}
