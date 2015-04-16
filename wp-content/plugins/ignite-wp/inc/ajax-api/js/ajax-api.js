@@ -127,8 +127,10 @@
 				replaceData: false,
 				data: {
 					url: clearHashFromURL(url),
-					title: newElem.data("ajax-title") || document.title,
-					bodyClass: $("body").attr("class")
+					origTitle: newElem.data("ajax-title") || document.title,
+					aliasTitle: newElem.data("ajax-alias-title"),
+					bodyClass: $("body").attr("class"),
+					alias: newElem.data("ajax-alias")
 				}
 			}, params);
 			
@@ -136,6 +138,12 @@
 				var aliasesVisible = this.getByAlias(newElem.data("ajax-alias"));
 				if(aliasesVisible.length == 0)
 					ret.ajaxAPIData("is-main-alias", true);
+			}
+
+			params.data.title = params.data.origTitle;
+			if(compareURLs(clearHashFromURL(newElem.data("ajax-alias")), clearHashFromURL(url))) {
+				params.data.title = typeof params.data.aliasTitle == "undefined" ? params.data.origTitle : params.data.aliasTitle;
+				params.data.aliasTitle = params.data.title;
 			}
 
 			if(typeof params.data == "object"){
