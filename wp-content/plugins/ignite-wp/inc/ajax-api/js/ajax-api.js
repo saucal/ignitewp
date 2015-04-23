@@ -393,7 +393,7 @@
 				if(!hasToBuffer.isDefaultPrevented()){
 					var bufferData = {
 						data: {
-							title: ajaxBody.find(".title-helper").text(),
+							origTitle: ajaxBody.find(".title-helper").text(),
 							bodyClass: ajaxBody.find(".body-class-helper").removeClass('body-class-helper').attr("class"),
 						}
 					};
