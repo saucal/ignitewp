@@ -292,7 +292,10 @@
 		this.triggerWithOnce( "contentFirstLoad", content, [content] );
     }
     SAUCAL_AJAX_API.prototype.markLinks = function(href){
-		$(ajaxAPI.config.menuSelector.item+" a").each(function(){
+    	var links = $(ajaxAPI.config.menuSelector.item+" a");
+
+    	// clear classes
+    	links.each(function(){
 			$(this).parentsUntil(ajaxAPI.config.menuSelector.menu, ajaxAPI.config.menuSelector.item)
 					.removeClass("current-menu-item").removeClass("current_page_item")
 					.removeClass("current_page_parent")
@@ -301,18 +304,26 @@
 					.removeClass("current-page-ancestor")
 					.removeClass("current-menu-parent")
 					.removeClass("current-menu-ancestor")
-		}).filter(function(){
-			return compareURLs(clearHashFromURL($(this).attr("href")), href);
-		}).each(function(){
-			$(this).parent().addClass("current-menu-item").addClass("current_page_item")
-				.parentsUntil(ajaxAPI.config.menuSelector.menu, ajaxAPI.config.menuSelector.item)
-					.addClass("current_page_parent")
-					.addClass("current_page_ancestor")
-					.addClass("current-page-parent")
-					.addClass("current-page-ancestor")
-					.addClass("current-menu-parent")
-					.addClass("current-menu-ancestor");
 		});
+
+    	// get current links
+    	var currentLinks = links.filter(function(){
+			return compareURLs(clearHashFromURL($(this).attr("href")), href);
+		});
+
+    	// if there are current links add classes to them.
+		if(currentLinks.length > 0) {
+			currentLinks.each(function(){
+				$(this).parent().addClass("current-menu-item").addClass("current_page_item")
+					.parentsUntil(ajaxAPI.config.menuSelector.menu, ajaxAPI.config.menuSelector.item)
+						.addClass("current_page_parent")
+						.addClass("current_page_ancestor")
+						.addClass("current-page-parent")
+						.addClass("current-page-ancestor")
+						.addClass("current-menu-parent")
+						.addClass("current-menu-ancestor");
+			});
+		}
 	}
 	SAUCAL_AJAX_API.prototype.hasToReplaceClick = function(link){
 		
@@ -470,6 +481,9 @@
 
 		var effDef = ajaxAPI.config.animDefGet(newContent, currContent);
 		var href = newContent.ajaxAPIData("url");
+
+		ajaxAPI.markLinks(href);
+		
 		effDef.done(function(){
 			if(!isInDOMTree(newContent.get(0)))
 				newContent.hide().insertAfter(currContent);
