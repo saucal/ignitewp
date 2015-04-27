@@ -29,6 +29,7 @@ if(function_exists("add_ignite_support")) {
 	    </div>
 	    <?php
 	});
+	return;
 }
 
 // After that, you should code as usual, making use of the modules at will.
