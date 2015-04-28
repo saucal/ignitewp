@@ -88,7 +88,13 @@ class Ignite_Scripts {
         if(!isset($this->scripts[$enqueueEnviroment][$enqueue_at_priority])) 
             $this->scripts[$enqueueEnviroment][$enqueue_at_priority] = array();
 
-        $this->scripts[$enqueueEnviroment][$enqueue_at_priority][] = array($script_id, rtrim($moduleEnvUrl, "/")."/".$path, $deps, $ver, $in_footer);
+        if(strpos($path, "//") === 0 || strpos($path, "http://") === 0 || strpos($path, "https://") === 0) {
+            $urlPath = $path;
+        } else {
+            $urlPath = rtrim($moduleEnvUrl, "/")."/".$path;
+        }
+
+        $this->scripts[$enqueueEnviroment][$enqueue_at_priority][] = array($script_id, $urlPath, $deps, $ver, $in_footer);
     }
     function initialize_registering(){
         extract(ignite_get_current_enviroment());
@@ -155,7 +161,13 @@ class Ignite_Styles {
         if(!isset($this->scripts[$enqueueEnviroment][$enqueue_at_priority])) 
             $this->scripts[$enqueueEnviroment][$enqueue_at_priority] = array();
 
-        $this->scripts[$enqueueEnviroment][$enqueue_at_priority][] = array($script_id, rtrim($moduleEnvUrl, "/")."/".$path, $deps, $ver, $media);
+        if(strpos($path, "//") === 0 || strpos($path, "http://") === 0 || strpos($path, "https://") === 0) {
+            $urlPath = $path;
+        } else {
+            $urlPath = rtrim($moduleEnvUrl, "/")."/".$path;
+        }
+
+        $this->scripts[$enqueueEnviroment][$enqueue_at_priority][] = array($script_id, $urlPath, $deps, $ver, $media);
     }
     function initialize_registering(){
         extract(ignite_get_current_enviroment());
