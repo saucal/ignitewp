@@ -40,6 +40,42 @@
             return $(this).data("thread-id") == thread_ID;
         });
 	}
+    
+    var queues = {};
+    function getAjaxCount(id) {
+        if(typeof queues[id] != "undefined")
+            return queues[id].promise();
+
+        var def = $.Deferred();
+        queues[id] = def;
+
+        ajaxGetJSON("disqus-comment-count", {
+            post_id: id
+        }, function(data, json){
+            def.resolve(json);
+        });
+
+        return def.promise();
+    }
+
+    $(document).on("infinite-loaded", function(e, $elem){
+        $elem.find(".disqus_thread").html("");
+        $elem.find(".display_comment_count").each(function(){
+            var thisElem = $(this);
+            var post_id = thisElem.data("thread-id");
+            post_id = post_id.replace("post_", "");
+            getAjaxCount(post_id).done(function(data){
+                var evt = $.Event("disqus-comment-count");
+                evt.post_id = post_id;
+                evt.count = data;
+                thisElem.trigger(evt);
+                if(!evt.isDefaultPrevented()) {
+                    thisElem.append("<span class='comment-count'>"+evt.count+"</span>");
+                }
+            });
+        })
+    });
+
 	window.loadComments = function(thread_ID){
 
         var def = $.Deferred();
@@ -125,21 +161,48 @@
 	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
 	    }
     }
+
+    function isElementInViewport (el) {
+
+        //special bonus for those using jQuery
+        if (typeof jQuery === "function" && el instanceof jQuery) {
+            el = el[0];
+        }
+
+        var rect = el.getBoundingClientRect();
+
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
+        );
+    }
+
     $.fn.performDisqusLazyLoad = function(){
         var link = $(this);
         link.addClass("disabled");
         var thread_ID = link.data("thread-id");
         var thread = findThreadElement(thread_ID);
+
+        if(!isElementInViewport(thread))
+            $(window).scrollTo(thread, 400, {
+                offset: {top: -100, left: 0}
+            });
         
         thread.trigger("disqus-lazy-load-start", [link]);
+        thread.addClass('disqus-lazy-loading');
         thread.one("disqus-rendered", function(){
+            thread.removeClass('disqus-lazy-loading');
         	link.removeClass('disabled');
-        	link.parent().hide();
+            $(".lazy-load-disqus a[data-thread-id='"+thread_ID+"']").each(function(){
+                $(this).parent().hide();
+            });
         });
 
         loadComments(thread_ID);
     };
-    $(document).on("click", ".lazy-load-disqus a", function(e){
+    $(document).on("click", ".lazy-load-disqus a, .load_disqus_thread", function(e){
         e.preventDefault();
         $(this).performDisqusLazyLoad();
     });

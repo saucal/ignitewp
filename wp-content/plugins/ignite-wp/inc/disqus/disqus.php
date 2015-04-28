@@ -1,4 +1,8 @@
 <?php 
+
+add_ignite_support("ajax-request");
+add_ignite_support("js-scrollto");
+
 add_action("init", function(){
     global $wp_filter;
     global $withcomments;
@@ -61,4 +65,65 @@ function ignite_dsq_comments_template($value) {
     $EMBED = true;
     return SAUCAL_TPL_LIB_DIR(__FILE__) . '/theme/disqus-comments-template.php';
 }
+
+function _get_disqus_comment_count($post_id) {
+    if(empty($post_id))
+        return 0;
+
+    global $dsq_api;
+    $transient = "dsq_comment_count_".intval($post_id);
+
+    $post = get_post($post_id);
+    $identifier = dsq_identifier_for_post($post);
+    $title = dsq_title_for_post($post);
+
+
+    $thread = $dsq_api->api->thread_by_identifier($identifier, $title);
+
+    if(empty($thread) || empty($thread->thread))
+        return 0;
+
+    $threadID = $thread->thread->id;
+
+    $dsq_api->api->user_api_key = get_option("disqus_user_api_key");
+    if(empty($dsq_api->api->user_api_key))
+        return 0;
+
+    $counts = $dsq_api->api->get_num_posts($threadID);
+    if(empty($counts) || empty($counts->$threadID))
+        return 0;
+
+    $counts = $counts->$threadID;
+
+    $data = (int) $counts[1];
+
+    set_transient( $transient, $data, 5 * MINUTE_IN_SECONDS );
+
+    return $data;
+}
+
+function get_disqus_comment_count($post_id) {
+    global $dsq_api;
+    $transient = "dsq_comment_count_".intval($post_id);
+    $data = get_transient( $transient );
+
+    if($data !== false)
+        return (int) $data;
+
+    $data = _get_disqus_comment_count($post_id);
+
+    set_transient( $transient, $data, 5 * MINUTE_IN_SECONDS );
+
+    return $data;
+}
+
+function ajax_get_comment_count() {
+    $post_id = $_REQUEST["post_id"];
+    $count = get_disqus_comment_count($post_id);
+    die(json_encode($count));
+}
+
+add_action("wp_ajax_disqus-comment-count", "ajax_get_comment_count");
+add_action("wp_ajax_nopriv_disqus-comment-count", "ajax_get_comment_count");
+
 ?>
