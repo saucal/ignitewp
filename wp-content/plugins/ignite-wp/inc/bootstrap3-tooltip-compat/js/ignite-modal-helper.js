@@ -30,7 +30,7 @@
 
 
 		var closeWidgetFunc = function(){
-			widgetBigArea.modal("hide").one("hidden.bs.modal", function(){
+			widgetBigArea.igniteModal("hide").one("hidden.bs.modal", function(){
 				widgetBigArea.remove();
 			})
 		}
