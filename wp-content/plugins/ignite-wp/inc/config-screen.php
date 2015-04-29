@@ -6,22 +6,48 @@ class Settings_Screen {
     		"title" => "Settings Page",
     		"settings" => array(),
     		"slug" => "settings",
+            "parent" => 'options-general.php',
+            'capability' => 'manage_options'
     	), $opts);
-        add_filter( 'admin_init' , array( &$this , 'register_fields' ) );
-        add_action( 'admin_menu', array( &$this , 'settings_menu' ) );
+
+        if( function_exists('acf_add_options_page') ) {
+
+            if(!empty($this->opts["parent"]) || !empty($this->opts["parent_slug"])) {
+                acf_add_options_sub_page(array_intersect_key($this->opts, array_fill_keys(array("title", "slug", "parent", "parent_slug", "capability"), "")));
+            } else {
+                $keys = array_intersect_key($this->opts, array_fill_keys(array("title", "slug", "capability"), ""));
+                $keys = array_merge($keys, array(
+                    "redirect" => false
+                ));
+                acf_add_options_page( $keys );
+            }
+
+            add_ignite_support("acf-parser");
+            $boxes = new ACF_Parser($this->opts["settings"], array(
+                "options_page" => $this->opts["slug"]
+            ));
+            $parsed_meta_boxes = $boxes->get_parsed();
+            foreach($parsed_meta_boxes as $box){
+                register_field_group($box);
+            }
+            
+        } else {
+            add_filter( 'admin_init' , array( &$this , 'register_fields' ) );
+            add_action( 'admin_menu', array( &$this , 'settings_menu' ) );
+        }
     }
     function register_fields() {
 	    foreach ($this->opts["settings"] as $section_slug => $section) {
 	    	$section_slug = $this->opts["slug"].'-'.$section_slug;
 	    	add_settings_section($section_slug , '', array(&$this, 'section_one_callback'), $this->opts["slug"] );
-		    foreach ($section as $meta => $settingOpts) {
+		    foreach ($section["fields"] as $meta => $settingOpts) {
 		    	$this->add_setting($meta, $section_slug, $settingOpts);
 		    };
 		};
     }
     function add_setting($meta, $section, $options){
     	$options = array_merge(array(
-    		"title" => "Setting",
+    		"name" => "Setting",
     		"save_function" => "esc_attr",
     		"get_function" => false,
     		"type" => "text",
@@ -29,7 +55,7 @@ class Settings_Screen {
     	), $options);
     	extract($options);
     	register_setting( $this->opts["slug"].'-group', $meta, $save_function );
-        add_settings_field($meta, '<label for="'.$meta.'">'.$title.'</label>' , array(&$this, 'fields_html') , $this->opts["slug"], $section, $options );
+        add_settings_field($meta, '<label for="'.$meta.'">'.$name.'</label>' , array(&$this, 'fields_html') , $this->opts["slug"], $section, $options );
     }
     function section_one_callback() {
 	    //echo 'Some help text goes here.';
