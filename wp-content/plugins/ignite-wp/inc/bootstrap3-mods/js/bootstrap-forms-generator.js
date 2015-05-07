@@ -1,9 +1,9 @@
 (function($){
-	$.mapForm = function(options){
+	$.igniteForm = function(options){
 		options = $.extend(true, {
 			fields: {},
 			labelWidth: 2,
-			id: "mapForm",
+			id: "igniteForm",
 			validateForm: false
 		}, options);
 
