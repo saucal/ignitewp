@@ -87,7 +87,7 @@ if(!class_exists("SaucalCPT")){
 					}
 					array_push($taxonomies_for_post_type, $tax["slug"]);
 				} elseif (is_string($tax)) {
-					array_push($tax);
+					array_push($taxonomies_for_post_type, $tax);
 				}
 			}
 			
