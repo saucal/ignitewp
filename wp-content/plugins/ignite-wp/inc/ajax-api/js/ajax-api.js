@@ -146,6 +146,8 @@
 				params.data.aliasTitle = params.data.title;
 			}
 
+			this.api.triggerWith("pre-buffer", url, ret, [params]);
+
 			if(typeof params.data == "object"){
 				$.each(params.data, function(prop, val){
 					if(params.replaceData === false){
@@ -155,8 +157,6 @@
 					ret.ajaxAPIData(prop, val);
 				})
 			}
-
-			this.api.triggerWith("pre-buffer", url, ret, [params]);
 			
 			this.buffer = this.buffer.add(ret);
 		} else {
@@ -399,14 +399,15 @@
 				var ajaxBody = $("<div></div>").html(data);
 				var content = ajaxBody.find(ajaxAPI.config.contentSelector);
 
-				var hasToBuffer = ajaxAPI.trigger("beforeBuffer", content);
+				var bufferData = {
+					origTitle: ajaxBody.find(".title-helper").text(),
+					bodyClass: ajaxBody.find(".body-class-helper").removeClass('body-class-helper').attr("class"),
+				};
+				var hasToBuffer = ajaxAPI.trigger("beforeBuffer", content, ajaxBody, bufferData);
 				var ret = $();
 				if(!hasToBuffer.isDefaultPrevented()){
 					var bufferData = {
-						data: {
-							origTitle: ajaxBody.find(".title-helper").text(),
-							bodyClass: ajaxBody.find(".body-class-helper").removeClass('body-class-helper').attr("class"),
-						}
+						data: bufferData
 					};
 					ret = contentBuffer.add(content, url, bufferData)
 				}
