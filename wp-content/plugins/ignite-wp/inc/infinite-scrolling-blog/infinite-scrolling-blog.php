@@ -178,7 +178,7 @@ function infinite_blog_get_post_data_by_id($id){
 	wp_title();
 	$wp_title = ob_get_contents();
 	ob_end_clean();
-	$data["title_tag"] = html_entity_decode($wp_title);
+	$data["title_tag"] = $wp_title;
 	ob_start();
 	while(have_posts()): the_post();
 	$data["permalink"] = get_permalink();
@@ -208,7 +208,8 @@ function infinite_blog_get_post_by_id() {
 	if(empty($_REQUEST["req"]))
 		$_REQUEST["req"] = "scroll";
 
-	echo json_encode(infinite_blog_get_post_data_by_id($_REQUEST["post_id"]));
+	$data = infinite_blog_get_post_data_by_id($_REQUEST["post_id"]);
+	echo json_encode($data);
 	exit;
 }
 
