@@ -54,7 +54,7 @@ function file_absolute_mtime($lessFilePath) {
 	return $m;
 }
 
-add_filter("style_loader_src", function($url){
+function ignite_maybe_compile_less($url) {
 	if(strpos($url, ".less") !== false){
 		require_once SAUCAL_TPL_LIB_DIR(__FILE__) . '/inc/lessc.inc.php';
 		$compiled = false;
@@ -138,7 +138,9 @@ add_filter("style_loader_src", function($url){
 		}
 	}
 	return $url;
-});
+}
+
+add_filter("style_loader_src", "ignite_maybe_compile_less");
 
 add_filter("style_loader_tag", function($tag){
 	if(strpos($tag, ".less") !== false && strpos($tag, ".lessc") === false) {
