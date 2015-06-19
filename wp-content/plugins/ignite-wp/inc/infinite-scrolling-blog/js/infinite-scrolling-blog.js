@@ -509,8 +509,12 @@
 			if(loaded.length > 0) {
 				loaded.markInSidebar();
 				scrollingParent.trigger("infinite-scrolling-to", [loaded]);
+				var scrollingTo = {
+					top: loaded.offset().top
+				};
+				scrollingParent.trigger("filter-scrolling-to", [scrollingTo]);
 				scrollingParent.stop().animate({
-					"scrollTop": loaded.offset().top
+					"scrollTop": scrollingTo.top
 				}, 500).promise().done(function(){
 					loaded.markInSidebar(false);
 				});
