@@ -70,12 +70,6 @@ function ignite_get_current_enviroment(){
 
 class Ignite_Scripts {
     var $scripts = array();
-    function Ignite_Scripts() {
-        $action = "wp";
-        if(is_admin())
-            $action = "admin_init";
-        add_action($action, array($this, "initialize_registering"));
-    }
     function register_script($script_id, $path, $deps = array(), $ver = false, $in_footer = false, $enqueue_at_priority = "no") {
         extract(ignite_get_current_enviroment());
 
@@ -95,6 +89,16 @@ class Ignite_Scripts {
         }
 
         $this->scripts[$enqueueEnviroment][$enqueue_at_priority][] = array($script_id, $urlPath, $deps, $ver, $in_footer);
+
+
+        $action = "wp";
+        if(is_admin())
+            $action = "admin_init";
+
+        if(did_action($action))
+            $this->initialize_registering();
+        else
+            add_action($action, array($this, "initialize_registering"));
     }
     function initialize_registering(){
         extract(ignite_get_current_enviroment());
@@ -118,7 +122,11 @@ class Ignite_Scripts {
                             break;
                     }
                     foreach($cbs as $cb) {
-                        add_action($cb, create_function("", "return IgniteScripts()->enqueue_list(".var_export($scripts, true).");"), $prio);
+                        if(did_action( $cb )) {
+                            IgniteScripts()->enqueue_list($scripts);
+                        } else {
+                            add_action($cb, create_function("", "return IgniteScripts()->enqueue_list(".var_export($scripts, true).");"), $prio);
+                        }
                     }
                 }
             }
@@ -143,12 +151,6 @@ IgniteScripts();
 
 class Ignite_Styles {
     var $scripts = array();
-    function Ignite_Styles() {
-        $action = "wp";
-        if(is_admin())
-            $action = "admin_init";
-        add_action($action, array($this, "initialize_registering"));
-    }
     function register_style($script_id, $path, $deps = array(), $ver = false, $media = "all", $enqueue_at_priority = "no") {
         extract(ignite_get_current_enviroment());
 
@@ -168,6 +170,15 @@ class Ignite_Styles {
         }
 
         $this->scripts[$enqueueEnviroment][$enqueue_at_priority][] = array($script_id, $urlPath, $deps, $ver, $media);
+
+        $action = "wp";
+        if(is_admin())
+            $action = "admin_init";
+
+        if(did_action($action))
+            $this->initialize_registering();
+        else
+            add_action($action, array($this, "initialize_registering"));
     }
     function initialize_registering(){
         extract(ignite_get_current_enviroment());
@@ -192,7 +203,11 @@ class Ignite_Styles {
                             break;
                     }
                     foreach($cbs as $cb) {
-                        add_action($cb, create_function("", "return IgniteStyles()->enqueue_list(".var_export($scripts, true).");"), $prio);
+                        if(did_action($cb)) {
+                            IgniteStyles()->enqueue_list($scripts);
+                        } else {
+                            add_action($cb, create_function("", "return IgniteStyles()->enqueue_list(".var_export($scripts, true).");"), $prio);
+                        }
                     }
                 }
             }
