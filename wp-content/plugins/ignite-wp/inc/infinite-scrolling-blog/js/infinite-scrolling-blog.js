@@ -592,7 +592,7 @@
 				if(state === null || typeof state["blog_post_id"] == "undefined")
 					return;
 
-				goToPost(event.state["blog_post_id"]);
+				goToPost(state["blog_post_id"]);
 			})
 		}
 	});
