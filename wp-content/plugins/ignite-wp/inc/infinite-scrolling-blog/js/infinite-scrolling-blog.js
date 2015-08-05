@@ -58,7 +58,7 @@
 				if(bubbled)
 					return;
 				bubbled = true;
-				scrollingParent.trigger("scroll");
+				scrollingParent.trigger("maybeLoad");
 				bubbled = false;
 			});
 
@@ -206,6 +206,8 @@
 			console.log(e.target);
 		}*/
 
+		infiniteScrollConfig.posts_before_button = parseInt(infiniteScrollConfig.posts_before_button, 10);
+
 		var blogarea = $(infiniteScrollConfig.selectors.blogarea);
 		if(blogarea.data("blog-initialized") || blogarea.length == 0) 
 			return;
@@ -323,7 +325,7 @@
 						post.siblings().remove();
 					});
 					scrollingParent.trigger("load-single", [ignId]);
-					scrollingParent.trigger("scroll");
+					scrollingParent.trigger("maybeLoad");
 				} else {
 					triggerLoading();
 				}
@@ -376,8 +378,19 @@
 		historyAPI.on("popstate", function() {
 			scrollingAfterPopstate = true;
 		})
-
 		scrollingParent.on("scroll", function(e){
+			scrollingParent.trigger("maybeLoad");
+		})
+
+		postscontainer.on("click", ".infinite-next-batch, .infinite-prev-batch", function(e){
+			e.preventDefault();
+			var direction = 1;
+			if($(this).is('.infinite-prev-batch'))
+				direction = -1;
+			scrollingParent.trigger("maybeLoad", [true, direction]);
+		});
+
+		scrollingParent.on("maybeLoad", function(e, forceLoad, forceDirection){
 			if(!$(e.target).is(scrollingParent))
 				return;
 
@@ -391,14 +404,21 @@
 			}
 
 			var viewport = scrollingParent.getViewport();
-			var allPosts = postscontainer.children();
+			var dividerLines = postscontainer.children(".divider-line");
+			var allPosts = postscontainer.children().not(dividerLines);
 
 			var direction = 0;
-			if(lastScroll.top < viewport.top){
-				direction = 1;
-			} else if(lastScroll.top > viewport.top) {
-				direction = -1;
+			if(typeof forceDirection != "undefined") {
+				direction = forceDirection;
+			} else {
+				if(lastScroll.top < viewport.top){
+					direction = 1;
+				} else if(lastScroll.top > viewport.top) {
+					direction = -1;
+				}
 			}
+			// Set Variables for next calls
+			lastScroll = scrollingParent.getViewport();
 
 			//Cleanup old classes and check for new ones
 			allPosts.removeClass('onscreen first last scrolledPastTop scrolledPastBottom');
@@ -441,11 +461,32 @@
 				}
 			}
 
+			
 
 			//Post loading triggers
 			var firstPost = allPosts.first();
 			var lastPost = allPosts.last();
+			console.log(direction);
 			if(direction < 0) {
+				var postsAfterButton = allPosts.length;
+				if(dividerLines.length > 0) {
+					postsAfterButton = dividerLines.first().prevAll().length;
+				}
+
+				if(postsAfterButton >= infiniteScrollConfig.posts_before_button) {
+					if(!getPrev(allPosts.first().getPostId()))
+						return;
+
+					$("<div/>", {
+						"class": "divider-line divider-prev"
+					}).html($(infiniteScrollConfig.load_prev_posts_button).addClass('infinite-prev-batch')).prependTo(postscontainer);
+					return;
+				}
+
+				if(postsAfterButton == 0 && !forceLoad) 
+					return;
+
+
 				if(firstPost.hasClass('scrolledPastTop') && !firstPost.hasClass('waiting-for-prev')) {
 					var postId = getPrev(firstPost.getPostId());
 					if(postId !== false){
@@ -456,6 +497,25 @@
 					}
 				}
 			} else {
+				var postsAfterButton = allPosts.length;
+				if(dividerLines.length > 0) {
+					postsAfterButton = dividerLines.last().nextAll().length;
+				}
+
+				if(postsAfterButton >= infiniteScrollConfig.posts_before_button) {
+					if(!getNext(allPosts.last().getPostId()))
+						return;
+
+					$("<div/>", {
+						"class": "divider-line divider-next"
+					}).append($(infiniteScrollConfig.load_next_posts_button).addClass('infinite-next-batch')).appendTo(postscontainer);
+					return;
+				}
+
+				if(postsAfterButton == 0 && !forceLoad) 
+					return;
+
+
 				if(lastPost.hasClass('scrolledPastBottom') && !lastPost.hasClass('waiting-for-next')) {
 					var postId = getNext(lastPost.getPostId());
 					if(postId !== false){
@@ -467,14 +527,11 @@
 				}
 			}
 
-			// Set Variables for next calls
-			lastScroll = scrollingParent.getViewport();
-
 			scrollingAfterPopstate = false;
-		}).trigger("scroll"); // trigger the first scroll;
+		}).trigger("maybeLoad"); // trigger the first scroll;
 
 		scrollingParent.onElementResize(function(){
-			scrollingParent.trigger("scroll");
+			scrollingParent.trigger("maybeLoad");
 		})
 
 		scrollingParent
@@ -483,6 +540,7 @@
 			getPost(id, function(response){
 				//append the post
 				postscontainer.append(response.html);
+				postscontainer.children(".divider-line").last().hide();
 				scrollingParent.trigger("infinite-loaded", [postscontainer.children("#post-"+id)]);
 				postscontainer.children(".waiting-for-next").removeClass('waiting-for-next');
 			});
@@ -496,6 +554,7 @@
 
 				//actually prepend the post
 				postscontainer.prepend(response.html);
+				postscontainer.children(".divider-line").first().hide();
 				scrollingParent.trigger("infinite-loaded", [postscontainer.children("#post-"+id)]);
 				postscontainer.children(".waiting-for-prev").removeClass('waiting-for-prev');
 
@@ -540,7 +599,7 @@
 			elem.wrap("<div class='post-wrapper'></div>").trigger("infinite-ready");
 			elem.unwrap();
 			setTimeout(function(){
-				scrollingParent.trigger("scroll");
+				scrollingParent.trigger("maybeLoad");
 			}, 1);
 		}); 
 

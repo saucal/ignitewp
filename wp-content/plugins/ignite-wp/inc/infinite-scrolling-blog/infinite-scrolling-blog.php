@@ -15,6 +15,9 @@ add_action("init", function(){
 		"prefixmenuitemid" => "menu-post-",
 		"posts_in_sidebar" => 40,
 		"posts_initially_loaded" => 10,
+		"posts_before_button" => 1,
+		"load_prev_posts_button" => '<a href="#">Load More Posts</a>',
+		"load_next_posts_button" => '<a href="#">Load More Posts</a>',		
 	));
 	wp_localize_script( "saucal-infinite-scrolling-blog", "infiniteScrollConfig", $infiniteScrollConfig);
 });
