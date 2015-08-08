@@ -45,8 +45,33 @@
 		bounds.bottom = bounds.top + this.outerHeight();
 		return ((bounds.top <= viewport.bottom) && (bounds.bottom >= viewport.top));
 	};
+	if(typeof $.fn.scrollParent == "undefined") { // if jquery UI is present, do not include this.
+		$.fn.scrollParent = function( includeHidden ) {
+			var position = this.css( "position" ),
+				excludeStaticParent = position === "absolute",
+				overflowRegex = includeHidden ? /(auto|scroll|hidden)/ : /(auto|scroll)/,
+				scrollParent = this.parents().filter( function() {
+					var parent = $( this );
+					if ( excludeStaticParent && parent.css( "position" ) === "static" ) {
+						return false;
+					}
+					return overflowRegex.test( parent.css( "overflow" ) + parent.css( "overflow-y" ) + parent.css( "overflow-x" ) );
+				} ).eq( 0 );
+
+			return position === "fixed" || !scrollParent.length ? $( this[ 0 ].ownerDocument || document ) : scrollParent;
+		}
+	}
 	$.fn.getScrollingParent = function() {
-		var scrollingParent = $(this).offsetParent();
+		var thisEl = $(this);
+		var thisElPS = thisEl.parents(".ps-container").first();
+		var scrollingParent = $(this).scrollParent();
+		if(thisElPS.parents().filter(scrollingParent).length > 0) {
+			scrollingParent = thisElPS;
+		}
+
+		if(scrollingParent.is("body"))
+			scrollingParent = scrollingParent.closest("html");
+
 		if(scrollingParent.is("html")) {
 			//scrollingParent = $(window);
 			if(scrollingParent.data("window.patched"))
