@@ -148,7 +148,7 @@
 		}
 	}
 	var get_postsid = function(){
-		return $(infiniteScrollConfig.selectors.sidebaritemscont).children();
+		return $(infiniteScrollConfig.selectors.sidebaritem);
 	}
 	var getNext = function(curr){
 		var postsid = get_postsid();
@@ -220,6 +220,7 @@
 			postscontainer.css("overflow", "hidden")
 		}
 		var sidebar = $(infiniteScrollConfig.selectors.sidebar);
+		var sidebarScrollingPart = $(infiniteScrollConfig.selectors.sidebaritem).getScrollingParent();
 
 		var scrollingParent = postscontainer.getScrollingParent();
 
@@ -281,11 +282,12 @@
 
 		var triggerLoading = function(){
 			setTimeout(function(){
-				sidebar.scroll();
+				sidebarScrollingPart.scroll();
 			}, 1);
 		}
 
-		sidebar.on("scroll", function() {
+		sidebarScrollingPart.on("scroll", function(e) {
+			e.stopPropagation();
 			//console.error("scroll", sidebar.get(0));
 			if(sidebar.hasClass('no-more-posts'))
 				return;
@@ -354,8 +356,8 @@
 				sidebar.data("ajax-key", "");
 				sidebar.removeClass('no-more-posts');
 				sidebar.data("page", 0);
-				$(infiniteScrollConfig.selectors.sidebaritemscont).html("");
-				sidebar.trigger("scroll");
+				$(infiniteScrollConfig.selectors.sidebaritem).remove();
+				sidebarScrollingPart.trigger("scroll");
 			}
 		})
 
@@ -366,8 +368,8 @@
 			sidebar.data("ajax-key", "");
 			sidebar.removeClass('no-more-posts');
 			sidebar.data("page", 0);
-			$(infiniteScrollConfig.selectors.sidebaritemscont).html("");
-			sidebar.trigger("scroll");
+			$(infiniteScrollConfig.selectors.sidebaritem).remove();
+			sidebarScrollingPart.trigger("scroll");
 		})
 
 		/**

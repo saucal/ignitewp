@@ -9,6 +9,7 @@ add_action("init", function(){
 		"selectors" => array(
 			"sidebar" => "#blog-sidebar",
 			"sidebaritemscont" => "#blog-sidebar > ul",
+			"sidebaritem" => "#blog-sidebar > ul > li",
 			"blogarea" => "#blog-area",
 			"postscontainer" => "#blog-contents",
 		),
