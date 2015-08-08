@@ -327,7 +327,9 @@
 				'page': nextPage,
 				'ignore': sidebar.data("ignore"),
 				'filter': sidebar.data("filter") || "",
-				'order': sidebar.data("order") || ""
+				'order': sidebar.data("order") || "",
+				'category': sidebar.data("category") || 0,
+				'month': sidebar.data("month") || ""
 			}, function(response){
 				if(sidebar.data("ajax-key") != key)
 					return;
@@ -386,10 +388,16 @@
 			}
 		})
 
-		sidebar.on("change", ".order-field", function(e){
+		sidebar.on("change", ".order-field, .archive-field, .category-field", function(e){
 			var currVal = $(this).val();
 			sidebar.data("ignore", 0);
-			sidebar.data("order", currVal);
+			if($(this).hasClass('order-field')) {
+				sidebar.data("order", currVal);
+			} else if($(this).hasClass('archive-field')) {
+				sidebar.data("month", currVal);
+			} else if($(this).hasClass('category-field')) {
+				sidebar.data("category", currVal);
+			}
 			sidebar.data("ajax-key", "");
 			sidebar.removeClass('no-more-posts');
 			sidebar.data("page", 0);

@@ -41,6 +41,8 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 		"fields" => "posts",
 		"filter" => "",
 		"order" => "date_desc",
+		"category" => 0,
+		"month" => "",
 	);
 	$attrs = array_merge($defaults, $attrs);
 	$attrs = array_merge($attrs, $_REQUEST);
@@ -96,6 +98,19 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 			$attrs["order"] = "DESC";
 			$attrs["orderby"] = "post_date";
 			break;
+	}
+
+	if(!empty($attrs["category"])) {
+		$attrs["cat"] = $attrs["category"];
+	}
+	unset($attrs["category"]);
+
+	if(!empty($attrs["month"])) {
+		$month = explode("-", $attrs["month"]);
+		$attrs["monthnum"] = $month[1];
+		$attrs["year"] = $month[0];
+	} else {
+		unset($attrs["month"]);
 	}
 
 	$posts = get_posts($attrs);
@@ -258,5 +273,36 @@ function infinite_scrolling_search_field_attr() {
 	if(!empty($wp_query->query_vars["s"])) {
 		echo 'value="'.esc_attr($wp_query->get("s")).'" ';
 	}
+}
+
+function infinite_archive_dropdown() {
+	global $wpdb, $wp_locale;
+	$last_changed = wp_cache_get( 'last_changed', 'posts' );
+	if ( ! $last_changed ) {
+		$last_changed = microtime();
+		wp_cache_set( 'last_changed', $last_changed, 'posts' );
+	}
+	$where = "WHERE post_type = 'post' AND post_status = 'publish'";
+	$query = "SELECT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, count(ID) as posts FROM $wpdb->posts $where GROUP BY YEAR(post_date), MONTH(post_date) ORDER BY post_date DESC";
+	$key = md5( $query );
+	$key = "wp_get_archives:$key:$last_changed";
+	if ( ! $results = wp_cache_get( $key, 'posts' ) ) {
+		$results = $wpdb->get_results( $query );
+		wp_cache_set( $key, $results, 'posts' );
+	}
+	$output = "";
+	if ( $results ) {
+		$output .= '<select class="archive-field">';
+		$output .= '<option value="">'.esc_attr( __( 'All Dates' ) ).'</option>';
+		$after = $r['after'];
+		foreach ( (array) $results as $result ) {
+			$url = get_month_link( $result->year, $result->month );
+			/* translators: 1: month name, 2: 4-digit year */
+			$text = sprintf( __( '%1$s %2$d' ), $wp_locale->get_month( $result->month ), $result->year );
+			$output .= '<option value="'.$result->year."-".$result->month.'">'.$text.'</option>';
+		}
+		$output .= "</select>";
+	}
+	echo $output;
 }
 ?>
