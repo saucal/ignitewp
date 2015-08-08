@@ -241,9 +241,6 @@
 
 		blogarea.data("blog-initialized", true)
 		var postscontainer = $(infiniteScrollConfig.selectors.postscontainer);
-		if(postscontainer.css("overflow") == "visible") {
-			postscontainer.css("overflow", "hidden")
-		}
 		var sidebar = $(infiniteScrollConfig.selectors.sidebar);
 		var sidebarScrollingPart = $(infiniteScrollConfig.selectors.sidebaritem).getScrollingParent();
 
