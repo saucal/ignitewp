@@ -117,7 +117,7 @@
 				}
 			}
 
-			thisArea.on("scroll", function(){
+			thisArea.filter("body").on("scroll", function(){
 				$(window).trigger("scroll");
 			})
 		});
