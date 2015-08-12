@@ -144,7 +144,7 @@
 		var id = thisElem.getPostId();
 		if(id) {
 			$(this).addClass('current').siblings().removeClass('current');
-			var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).children("#"+infiniteScrollConfig.prefixmenuitemid+id);
+			var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).find("#"+infiniteScrollConfig.prefixmenuitemid+id);
 			menuItem.addClass('current').siblings().removeClass('current');
 
 			if(menuItem.length == 0)
@@ -153,7 +153,7 @@
 			if(doPush) {
 				var title = menuItem.data("wptitle");
 				var permalink = menuItem.data("permalink");
-				var evt = eventHandler.trigger("infinite-pushing-state", id, postscontainer.children("#post-"+id));
+				var evt = eventHandler.trigger("infinite-pushing-state", id, postscontainer.find("#post-"+id));
 				if(evt.isDefaultPrevented()) {
 					return;
 				}
@@ -175,9 +175,14 @@
 	var get_postsid = function(){
 		return $(infiniteScrollConfig.selectors.sidebaritem);
 	}
+	var getIdx = function(curr) {
+		var postsid = get_postsid();
+		var idx = postsid.index($("#"+infiniteScrollConfig.prefixmenuitemid+curr));
+		return idx;
+	}
 	var getNext = function(curr){
 		var postsid = get_postsid();
-		var nextIndex = postsid.index($("#"+infiniteScrollConfig.prefixmenuitemid+curr)) + 1;
+		var nextIndex = getIdx(curr) + 1;
 		if(typeof postsid[nextIndex] != "undefined"){
 			return $(postsid[nextIndex]).getPostId();
 		} else {
@@ -186,7 +191,7 @@
 	}
 	var getPrev = function(curr){
 		var postsid = get_postsid();
-		var nextIndex = postsid.index($("#"+infiniteScrollConfig.prefixmenuitemid+curr)) - 1;
+		var nextIndex = getIdx(curr) - 1;
 		if(typeof postsid[nextIndex] != "undefined"){
 			return $(postsid[nextIndex]).getPostId();
 		} else {
@@ -204,7 +209,7 @@
 		}, function(){
 			var json = arguments[1];
 			if(typeof json === "object") {
-				var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).children("#"+infiniteScrollConfig.prefixmenuitemid+id);
+				var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).find("#"+infiniteScrollConfig.prefixmenuitemid+id);
 				menuItem.each(function(){
 					$(this).attr("data-"+"permalink", json.permalink);
 					$(this).data("permalink", json.permalink);
@@ -226,6 +231,7 @@
 	/**
 	Initialization
 	*/
+	var ajaxAPIIntegrated = false;
 	$(document).on("contentFirstLoad ready", function(e){
 		/*if(e.target !== document) {
 			console.log(e.target);
@@ -314,37 +320,48 @@
 			if(sidebar.hasClass('no-more-posts'))
 				return;
 
+			if(parseInt(sidebar.data("found-posts"), 10) == $(infiniteScrollConfig.selectors.sidebaritem).length) {
+				sidebar.addClass('no-more-posts');
+			}
+
 			var key = Math.random();
 			sidebar.data("ajax-key", key);
-
 
 
 			var nextPage = sidebar.data("page") + 1;
 			ajaxGet('get_sidebar', {
 				'page': nextPage,
-				'ignore': sidebar.data("ignore"),
+				'single': sidebar.data("single"),
 				'filter': sidebar.data("filter") || "",
 				'order': sidebar.data("order") || "",
 				'category': sidebar.data("category") || 0,
 				'month': sidebar.data("month") || ""
-			}, function(response){
+			}, function(response, json){
 				if(sidebar.data("ajax-key") != key)
 					return;
-				if(response.length == 0) {
+
+				if(typeof json != "object" || json.html.length == 0) {
 					sidebar.addClass('no-more-posts');
 					return;
 				}
 
 				//append the items
-				$(infiniteScrollConfig.selectors.sidebaritemscont).append(response);
+				$(infiniteScrollConfig.selectors.sidebaritemscont).append(json.html);
+
 				sidebar.data("page", nextPage);
 				sidebar.attr("data-page", nextPage);
 
+				sidebar.data("found-posts", json.found_posts);
+				sidebar.attr("data-found-posts", json.found_posts);
 
-				if(nextPage == 1 && sidebar.data("ignore") === 0) {
-					var ignId = $(infiniteScrollConfig.selectors.sidebaritemscont).children().first().getPostId();
-					sidebar.data("ignore", ignId);
-					sidebar.attr("data-ignore", ignId);
+				if(sidebar.data("found-posts") == $(infiniteScrollConfig.selectors.sidebaritem).length) {
+					sidebar.addClass('no-more-posts');
+				}
+
+				if(nextPage == 1 && sidebar.data("single") === 0) {
+					var ignId = $(infiniteScrollConfig.selectors.sidebaritem).first().getPostId();
+					sidebar.data("single", ignId);
+					sidebar.attr("data-single", ignId);
 					//postscontainer.children().remove();
 					scrollingParent.off("infinite-loaded", triggerLoading).one("infinite-loaded", triggerLoading);
 					scrollingParent.off("infinite-scrolling-to.sidebar-search").one("infinite-scrolling-to.sidebar-search", function(e, post){
@@ -358,7 +375,10 @@
 			});
 		}).trigger("scroll");
 
-		sidebar.on("keyup", ".search-field", function(e){
+		sidebar.on("keyup", ".search-field", function(e, avoid){
+			if(avoid)
+				return;
+
 			var prev = $(this).data("prev-val") || "";
 
 			if(e.which == 13 || e.which == 27) {
@@ -375,7 +395,7 @@
 
 				$(this).data("prev-val", currVal);
 
-				sidebar.data("ignore", 0);
+				sidebar.data("single", 0);
 				sidebar.data("filter", currVal);
 				sidebar.data("ajax-key", "");
 				sidebar.removeClass('no-more-posts');
@@ -385,9 +405,12 @@
 			}
 		})
 
-		sidebar.on("change", ".order-field, .archive-field, .category-field", function(e){
+		sidebar.on("change", ".order-field, .archive-field, .category-field", function(e, ignore, avoid){
+			if(avoid)
+				return;
+
 			var currVal = $(this).val();
-			sidebar.data("ignore", 0);
+			sidebar.data("single", 0);
 			if($(this).hasClass('order-field')) {
 				sidebar.data("order", currVal);
 			} else if($(this).hasClass('archive-field')) {
@@ -400,7 +423,69 @@
 			sidebar.data("page", 0);
 			$(infiniteScrollConfig.selectors.sidebaritem).remove();
 			sidebarScrollingPart.trigger("scroll");
-		})
+		});
+
+		sidebar.on("changeSidebar", function(e, data){
+			if(typeof data == "undefined")
+				data = {};
+
+			if(typeof data.single != "undefined") {
+				sidebar.data("single", data.single);
+				sidebar.attr("data-single", data.single);
+			} else {
+				sidebar.data("single", 0);
+				sidebar.removeAttr("data-single");
+			}
+
+			if(typeof data.category != "undefined") {
+				sidebar.find(".category-field").val(data.category);
+				sidebar.data("category", data.category);
+				sidebar.attr("data-category", data.category);
+			} else {
+				sidebar.find(".category-field").val(0);
+				sidebar.data("category", false);
+				sidebar.removeAttr("data-category");
+			}
+
+			if(typeof data.month != "undefined") {
+				sidebar.find(".archive-field").val(data.month);
+				sidebar.data("month", data.month);
+				sidebar.attr("data-month", data.month);
+			} else {
+				sidebar.find(".archive-field").val("");
+				sidebar.data("month", false);
+				sidebar.removeAttr("data-month");
+			}
+
+			if(typeof data.order != "undefined") {
+				sidebar.find(".order-field").val(data.order);
+				sidebar.data("order", data.order);
+				sidebar.attr("data-order", data.order);
+			} else {
+				sidebar.find(".order-field").val("date_desc");
+				sidebar.data("order", false);
+				sidebar.removeAttr("data-order");
+			}
+
+			if(typeof data.filter != "undefined") {
+				sidebar.find(".search-field").val(data.filter);
+				sidebar.data("filter", data.filter);
+				sidebar.attr("data-filter", data.filter);
+			} else {
+				sidebar.find(".search-field").val("");
+				sidebar.data("filter", false);
+				sidebar.removeAttr("data-filter");
+			}
+
+			sidebar.find(".category-field, .archive-field, .order-field").trigger("change", [undefined, true]);
+			sidebar.find(".search-field").trigger("keyup", [true]);
+
+			sidebar.data("ajax-key", "");
+			sidebar.removeClass('no-more-posts');
+			sidebar.data("page", 0);
+			$(infiniteScrollConfig.selectors.sidebaritem).remove();
+			sidebarScrollingPart.trigger("scroll");
+		});
 
 		/**
 		Blog Scrolling
@@ -506,12 +591,22 @@
 				}
 
 				if(postsAfterButton >= infiniteScrollConfig.posts_before_button) {
-					if(!getPrev(allPosts.first().getPostId()))
+					var firstID = allPosts.first().getPostId();
+					if(!getPrev(firstID))
 						return;
+
+					var firstIdx = getIdx(firstID);
+					var postsleft = firstIdx;
+					var nextPageItems = infiniteScrollConfig.posts_before_button;
+					if(nextPageItems > postsleft)
+						nextPageItems = postsleft;
+					
+					var html = infiniteScrollConfig.load_prev_posts_button;
+					html = html.replace("%ITEMSLEFT%", postsleft).replace("%NEXTPAGEITEMS%", nextPageItems);
 
 					$("<div/>", {
 						"class": "divider-line divider-prev"
-					}).html($(infiniteScrollConfig.load_prev_posts_button).addClass('infinite-prev-batch')).prependTo(postscontainer);
+					}).html($(html).addClass('infinite-prev-batch')).prependTo(postscontainer);
 					return;
 				}
 
@@ -535,12 +630,23 @@
 				}
 
 				if(postsAfterButton >= infiniteScrollConfig.posts_before_button) {
-					if(!getNext(allPosts.last().getPostId()))
+
+					var lastID = allPosts.last().getPostId();
+					if(!getNext(lastID))
 						return;
+
+					var lastIdx = getIdx(lastID);
+					var postsleft = parseInt(sidebar.data("found-posts"), 10) - (lastIdx + 1);
+					var nextPageItems = infiniteScrollConfig.posts_before_button;
+					if(nextPageItems > postsleft)
+						nextPageItems = postsleft;
+					
+					var html = infiniteScrollConfig.load_next_posts_button;
+					html = html.replace("%ITEMSLEFT%", postsleft).replace("%NEXTPAGEITEMS%", nextPageItems);
 
 					$("<div/>", {
 						"class": "divider-line divider-next"
-					}).append($(infiniteScrollConfig.load_next_posts_button).addClass('infinite-next-batch')).appendTo(postscontainer);
+					}).append($(html).addClass('infinite-next-batch')).appendTo(postscontainer);
 					return;
 				}
 
@@ -656,9 +762,14 @@
 			scrollingParent.trigger("load-single", [post_id]);
 		}
 
-		if(typeof ajaxAPI != "undefined") {
+		if(typeof ajaxAPI != "undefined" && !ajaxAPIIntegrated) {
+			ajaxAPIIntegrated = true;
 
 			var baseURL = postscontainer.closest(ajaxAPI.config.contentSelector).data("ajax-alias");
+			var baseBuffer;
+			ajaxAPI.getPage(baseURL).done(function(buff){
+				baseBuffer = buff;
+			});
 
 			ajaxAPI.on("saucal_popstate", function(e, state) {
 				if(state === null || typeof state["blog_post_id"] == "undefined")
@@ -667,17 +778,48 @@
 				e.stopPropagation();
 
 				var currentContent = $(ajaxAPI.config.contentSelector);
-				ajaxAPI.getPage(baseURL).done(function(buffer){
-					if(buffer.is(currentContent)) {
+				if(baseBuffer.is(currentContent)) {
+					goToPost(state["blog_post_id"]);
+				} else {
+					ajaxAPI.switchTo(baseBuffer);
+					ajaxAPI.one("contentLoad", function(e){
 						goToPost(state["blog_post_id"]);
-					} else {
-						ajaxAPI.switchTo(buffer);
-						ajaxAPI.one("contentLoad", function(e){
-							goToPost(state["blog_post_id"]);
-						});
-					}
-				});
+					});
+				}
 			});
+
+			ajaxAPI.on("beforeBuffer", function(e, content, ajaxBody, bufferData){
+				var blogHelper = ajaxBody.find("div.blog-helper");
+				if(blogHelper.length > 0) {
+					bufferData.blogHelper = $.parseJSON(blogHelper.html());
+				}
+			});
+
+			ajaxAPI.on("prevHideOldContent", function(e, newContent, currContent, effDef, def) {
+				if(newContent.ajaxAPIData("alias") == baseURL) {
+					var blogHelper = newContent.ajaxAPIData("blogHelper");
+					if(blogHelper) {
+						e.preventDefault();
+
+						var switchContentFn = function(){
+							if(typeof blogHelper.single != "undefined") {
+								goToPost(parseInt(blogHelper.single, 10));
+							} else {
+								sidebar.trigger("changeSidebar", [blogHelper]);
+							}
+						}
+						if(currContent.is(baseBuffer)) {
+							switchContentFn();
+						} else {
+							ajaxAPI.switchTo(baseBuffer);
+							ajaxAPI.one("contentLoad", function(e){
+								switchContentFn();
+							})
+						}
+					}
+				}
+			});
+
 		} else {
 			historyAPI.on("popstate", function(e, state){
 				if(state === null || typeof state["blog_post_id"] == "undefined")
