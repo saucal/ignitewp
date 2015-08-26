@@ -223,6 +223,15 @@ Class ACF_Parser {
 					);
 					break;
 
+				case "date_picker":
+				case "date":
+					$field["type"] = "date_picker";
+					$defaults = array(
+						'display_format' => 'F j, Y',
+						'return_format' => 'F j, Y',
+						'first_day' => 1,
+					);
+
 				default:
 					# code...
 					break;
