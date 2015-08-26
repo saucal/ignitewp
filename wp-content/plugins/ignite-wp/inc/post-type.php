@@ -129,41 +129,75 @@ if(!class_exists("SaucalCPT")){
 				), $cleanOpts)
 			);
 			
-			
+			$this->parse_columns();
 			
 			//Customize columns
-			global $custom_columns_for_editor;
-			$custom_columns_for_editor[$slug] = array();
-			foreach($editor_columns as $colname => $label){
-				//if(!in_array($colname, array("cb","title","author","categories"."tags","comments","date"))){
-					if($colname == "thumbnail"){
-						$func = create_function('', 'echo \'<style type="text/css" media="screen"> .column-thumbnail { width: 52px; text-align: center!important; } </style>\';');    
-						add_action( 'admin_head', $func );
-					}
-				//}
-				$custom_columns_for_editor[$slug][$colname] = $label;
-			}
-			$func = create_function('$columns', 'global $custom_columns_for_editor; return $custom_columns_for_editor["'.$slug.'"];');
-			add_filter('manage_'.$slug.'_posts_columns', $func);
-			
-			$func = create_function('$column, $post_id', '
-				switch ($column)
-				{
-					case "thumbnail":
-						$width = (int) 35;
-						$height = (int) 35;
-						// Display the featured image in the column view if possible
-						if (has_post_thumbnail()) {
-							the_post_thumbnail( array($width, $height) );
-						} else {
-							echo "None";
-						}
-						break;
-				}
-			');
-			add_action('manage_'.$slug.'_posts_custom_column',  $func, 10, 2);
+			add_filter('manage_'.$slug.'_posts_columns', array($this, "register_columns"));
+			add_action('manage_'.$slug.'_posts_custom_column',  array($this, "render_columns"), 10, 2);
 		
 			$this->register_meta_boxes();
+		}
+
+		function parse_columns() {
+			foreach($this->opts["editor_columns"] as $colname => &$config){
+				if(is_string($config)) {
+					$config = array(
+						"label" => $config,
+					);
+				}
+				$config = array_merge(array(
+					"label" => "Column",
+					"actions" => array()
+				), $config);
+
+				$this->opts["editor_columns"][$colname] = $config;
+
+				if($colname == "thumbnail"){
+					$config["actions"]["admin_head"] = array($this, "add_thumbnail_style");
+					$config["callback"] = array($this, "thumbnail_callback");
+				}
+
+				if(!empty($config["actions"])){
+					foreach($config["actions"] as $action => $val) {
+						if(is_callable($val)) {
+							add_action($action, $val);
+						} else if(is_array($val)) {
+							foreach($val as $callable) {
+								add_action($action, $callable);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		function register_columns() {
+			$cleanColumns = array_map(function($val){
+				return $val["label"];
+			}, $this->opts["editor_columns"]);
+
+			return $cleanColumns;
+		}
+
+		function render_columns($column, $post_id) {
+			if(isset($this->opts["editor_columns"][$column]) && isset($this->opts["editor_columns"][$column]["callback"]) && is_callable($this->opts["editor_columns"][$column]["callback"])) {
+				call_user_func($this->opts["editor_columns"][$column]["callback"], $post_id);
+			}
+		}
+
+		function thumbnail_callback($post_id) {
+			$width = (int) 35;
+			$height = (int) 35;
+			// Display the featured image in the column view if possible
+			if (has_post_thumbnail()) {
+				the_post_thumbnail( array($width, $height) );
+			} else {
+				echo "None";
+			}
+		}
+
+		function add_thumbnail_style(){
+			echo '<style type="text/css" media="screen"> .column-thumbnail { width: 52px; text-align: center!important; } </style>';
 		}
 		
 		function register_meta_boxes(){
