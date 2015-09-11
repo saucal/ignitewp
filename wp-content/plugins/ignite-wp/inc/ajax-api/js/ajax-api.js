@@ -78,6 +78,20 @@
 	    }
 	}
 
+	window.urlsEqual = function(a, b) {
+		a = getLocationObject(a);
+		b = getLocationObject(b);
+		var ret = true;
+		var keys = ["host", "hostname", "pathname", "port", "protocol", "search"];
+		for(var i in keys) {
+			if(a[keys[i]] != b[keys[i]]) {
+				ret = false;
+				break;
+			}
+		}
+		return ret;
+	}
+
 	window.addParam = function(url, _param, _value) {
 	    var a = document.createElement('a');
 	    a.href = url;
@@ -183,8 +197,6 @@
 			else //if we didn't find aliases, go with the standard search
 				return this.buffer.filter(function(){
 					return compareURLs(clearHashFromURL($(this).ajaxAPIData("url")), clearHashFromURL(url));
-				}).each(function(){
-					$(this).ajaxAPIData("aliasing-as", false);
 				});
 		}
 	}
@@ -326,11 +338,11 @@
 		}
 	}
 	SAUCAL_AJAX_API.prototype.hasToReplaceClick = function(link){
-		
 		var url = $(link).prop("href");
+		var urlData = getLocationObject(url);
 
 		//check same domain
-		if($(link).get(0).host != window.location.host)
+		if(urlData.host != window.location.host)
 			return false;
 
 		//check if it's not a WP-Admin url we're accessing.
@@ -403,6 +415,11 @@
 					origTitle: ajaxBody.find(".title-helper").text(),
 					bodyClass: ajaxBody.find(".body-class-helper").removeClass('body-class-helper').attr("class"),
 				};
+				if(ajaxBody.find(".url-helper") != url) {
+					var newUrl = ajaxBody.find(".url-helper").html();
+					bufferData.alias = url;
+					url = newUrl;
+				}
 				var hasToBuffer = ajaxAPI.trigger("beforeBuffer", content, ajaxBody, bufferData);
 				var ret = $();
 				if(!hasToBuffer.isDefaultPrevented()){
@@ -439,10 +456,17 @@
     	var currentContent = $(ajaxAPI.config.contentSelector);
 
     	//check that the target is not the same as the source
+
+    	var urlData = getLocationObject(url);
+    	var currLocation = getLocationObject(currentContent.ajaxAPIData("url"));
+
 		if(clearHashFromURL(url) == currentContent.ajaxAPIData("url")) {
 			var alias = currentContent.ajaxAPIData("aliasing-as");
-			if(!alias || alias == clearHashFromURL(url)) {
+			if(!alias || urlsEqual(alias, urlData.href)) {
 				def.reject();
+				if(window.location.hash != urlData.hash) {
+					window.location.hash = urlData.hash;
+				}
 				return def.promise();
 			}
 		}
@@ -517,10 +541,6 @@
 		ajaxAPI.markLinks(href);
 
 		var currContent = $(ajaxAPI.config.contentSelector);
-		if(currContent.is(newContent)) {
-			def.resolveWith(newContent, [newContent]);
-			return def.promise();;
-		}
 
 		var effDef = $.Deferred();
 		var ret = thisAPI.triggerWith("prevHideOldContent", href, $(document), [newContent, currContent, effDef, def]);
@@ -528,6 +548,10 @@
 			return def.promise();
 		}
 
+		if(currContent.is(newContent)) {
+			def.resolveWith(newContent, [newContent]);
+			return def.promise();;
+		}
 
 		currContent.addClass('ajax-leaving');
 		newContent.addClass('ajax-entering');
