@@ -105,7 +105,12 @@
 			description: "Check this out",
 
 			noEffects: false,
-			showCount: false
+			showCount: false,
+			customStrings: {
+				noShares: "REPLACE_NUM",
+				share1: "REPLACE_NUM",
+				shares: "REPLACE_NUM"
+			}
 		}, config);
 		var newNw = {}
 		if(typeof networks == "string") {
@@ -204,8 +209,23 @@
 
 		if(config["showCount"] === true) {
 			getAjaxCount(config.url).done(function(data) {
-				if(typeof data[network] != "undefined")
-					link.append('<span class="social-count">'+data[network]+'</span>');
+				if(typeof data[network] != "undefined") {
+					data[network] = parseInt(data[network]);
+					var num = data[network]+"";
+					if(data[network] > 1000000) {
+						num = parseFloat(data[network]/1000000).toFixed(1)+"M"
+					} else if(data[network] > 1000) {
+						num = parseFloat(data[network]/1000).toFixed(1)+"k"
+					}
+
+					var str = config.customStrings.shares;
+					if(data[network] == 0)
+						str = config.customStrings.noShares;
+					if(data[network] == 1)
+						str = config.customStrings.share1;
+
+					link.append('<span class="social-count">'+str+'</span>');
+				}
 			})
 		}
 
