@@ -653,12 +653,16 @@
 	$.fn.fillParent = function(options){
 		if(options === undefined) options = {};
 		options = $.extend(true, {
-			hideImg: false
+			hideImg: false,
+			parent: false
 		}, options);
 		var thisIsIt = this;
 		$(thisIsIt).each(function(){
 			var thisEl = $(this);
 			var parent = thisEl.parent();
+			if(options.parent != false) {
+				parent = thisEl.closest(options.parent);
+			}
 			parent.css({
 				overflow: "hidden"
 			})
