@@ -141,7 +141,7 @@
 		gallery.data("ignitebox-pictures").push(data);
 		link.on("click", openGallery(gallery));
 
-		if(disqus_configs) {
+		if(typeof disqus_configs != "undefined") {
 			disqus_configs["post_"+data.id] = {
 				page: {
 					url: data.link,
