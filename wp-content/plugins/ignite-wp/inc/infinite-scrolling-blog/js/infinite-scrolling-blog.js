@@ -127,6 +127,16 @@
 			return 0;
 		}
 	}
+
+	$.fn.getSidebarItem = function() {
+		var id = $(this).getPostId();
+		if(id) {
+			return $(infiniteScrollConfig.selectors.sidebaritemscont).find("#"+infiniteScrollConfig.prefixmenuitemid+id);
+		} else {
+			return $();
+		}
+	}
+
 	$.fn.markInSidebar = function(doPush){
 		if(typeof doPush == "undefined")
 			doPush = true;
@@ -147,7 +157,7 @@
 		var id = thisElem.getPostId();
 		if(id) {
 			$(this).addClass('current').siblings().removeClass('current');
-			var menuItem = $(infiniteScrollConfig.selectors.sidebaritemscont).find("#"+infiniteScrollConfig.prefixmenuitemid+id);
+			var menuItem = $(this).getSidebarItem();
 			menuItem.addClass('current').siblings().removeClass('current');
 
 			if(menuItem.length == 0)
