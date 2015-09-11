@@ -4,6 +4,7 @@
 	    this.popped = false;
 	    this.initialURL = location.href;
 	    this.initialTitle = document.title;
+	    this.lastURL = location.href;
 
 	    this.evtElem = $("<div/>");
 
@@ -20,6 +21,9 @@
 	        var initialPop = !historyAPI.popped && location.href == historyAPI.initialURL;
 	        historyAPI.popped = true;
 	        if (initialPop) return;
+
+	        if(urlsEqual(self.lastURL, location.href))
+	        	return;
 
 	        var state = event.originalEvent.state;
 
@@ -42,6 +46,7 @@
 	        historyAPI.trigger(evt, fixed);
 	        self.popping = false;
 	        if(!evt.isDefaultPrevented() && fixed[1] !== null) {
+	        	this.lastURL = location.href;
 	        	historyAPI.doPopState.apply(historyAPI, fixed);
 	        }
 	    });
@@ -60,6 +65,20 @@
 	    	protocol: a.protocol,
 	    	search: a.search
 	    }
+	}
+
+	function urlsEqual(a, b) {
+		a = getLocationObject(a);
+		b = getLocationObject(b);
+		var ret = true;
+		var keys = ["host", "hostname", "pathname", "port", "protocol", "search"];
+		for(var i in keys) {
+			if(a[keys[i]] != b[keys[i]]) {
+				ret = false;
+				break;
+			}
+		}
+		return ret;
 	}
 
 	var HTMLtoText = function(html) {
@@ -84,6 +103,7 @@
 			}, title, href);
     		document.title = title;
     		this.analyticsPush(title, href);
+        	this.lastURL = href;
     		this.popped = true;
     	}
     	return evt;
@@ -101,6 +121,7 @@
 			}, title, href);
     		document.title = title;
     		this.analyticsPush(title, href);
+        	this.lastURL = href;
     	}
     	return evt;
     }
