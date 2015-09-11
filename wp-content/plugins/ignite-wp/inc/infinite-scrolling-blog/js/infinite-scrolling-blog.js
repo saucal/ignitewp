@@ -34,6 +34,9 @@
 		viewport.bottom = viewport.top + viewportElem.height();
 		viewport.left = viewportElem.scrollLeft();
 		viewport.right = viewport.left + viewportElem.width();
+
+		$(document).trigger("filter-infinite-viewport", [viewport]);
+
 		return viewport;
 	}
 	$.fn.isOnScreen = function(){
