@@ -10,8 +10,9 @@ function saucal_get_header(){
     if(!SAUCAL_IS_AJAX_REQUEST){
         get_header();
     } else {
+        global $wp;
         ?>
-        <div class="url-helper" style="display: none;"><?php echo get_permalink(get_queried_object_id()); ?></div>
+        <div class="url-helper" style="display: none;"><?php echo trailingslashit(home_url( $wp->request )); ?></div>
         <div class="title-helper" style="display: none;"><?php wp_title(); ?></div>
         <div <?php body_class("body-class-helper"); ?> style="display: none;"></div>
         <?php
