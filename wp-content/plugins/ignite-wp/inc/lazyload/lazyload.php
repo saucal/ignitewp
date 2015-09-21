@@ -67,7 +67,7 @@ class Saucal_Lazy_Load_Patcher {
 		return $new_html;
 	}
 	function shutdown() {
-		if(strpos($this->output, "<") == 0 && !is_admin()) {
+		if(strpos(trim($this->output), "<") == 0 && !is_admin()) {
 			echo self::parse_lazy($this->output);
 		} else {
 			echo $this->output;
