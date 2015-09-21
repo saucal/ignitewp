@@ -11,12 +11,14 @@ class Saucal_Lazy_Load_Patcher {
 	}
 	function init(){
 		wp_register_script( "lazy-load-xt", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.min.js", array("jquery"), "1.0.5", false );
+		wp_register_script( "lazy-load-xt-srcset", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.srcset.min.js", array("lazy-load-xt"), "1.0.5", false );
 		wp_register_style( "lazy-load-xt-fadein", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.fadein.min.css", array(), "1.0.5" );
 		wp_register_script( "saucal-lazy-load-xt-integration", SAUCAL_TPL_LIB_URL(__FILE__)."/js/lazyloadxt-integration.js", array("jquery"), "1.0", false );
 		ob_start(array($this, "catch_output"));
 	}
 	function wp_enqueue_scripts(){
 		wp_enqueue_script("lazy-load-xt");
+		wp_enqueue_script("lazy-load-xt-srcset");
 		wp_enqueue_script("saucal-lazy-load-xt-integration");
 		wp_enqueue_style("lazy-load-xt-fadein");	
 	}
@@ -45,6 +47,11 @@ class Saucal_Lazy_Load_Patcher {
 			$noscript = pq("<noscript/>", $doc);
 			$noscript->append($clone)->insertBefore($node);
 			$node->setAttribute('data-src', $node->getAttribute('src'));
+
+			if($node->getAttribute('srcset')) {
+				$node->setAttribute('data-srcset', $node->getAttribute('srcset'));
+				$node->removeAttribute ( 'srcset' );
+			}
 
 			$width = $node->getAttribute('width');
 			$height = $node->getAttribute('height');
