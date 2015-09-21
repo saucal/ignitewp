@@ -182,7 +182,7 @@
 			var localEvents = arrayClean(this.events[evt]);
 			for(var j=0;j<localEvents.length;j++) {
 				var curr = localEvents[j];
-				if((!!curr.filter && curr.filter == url) || !(!!url) || !(!!curr.filter)){
+				if((!!curr.filter && curr.filter == url) || (!(!!url) && !(!!curr.filter))) {
 					curr.fn.apply(fnScope, fnParams);
 					if(!!curr.once)
 						this.off(evt, curr.fn);
