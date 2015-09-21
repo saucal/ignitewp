@@ -596,6 +596,9 @@
 	    // Handle click event of all links with href not starting with http, https or #
 	    $(document).on('click', ajaxAPI.config.linkSelector, function(e){
 			var thisLink = $(this);
+			if(!thisLink.prop("href"))
+				return;
+
 			var evt = ajaxAPI.triggerWith("ajaxgetting", thisLink.prop("href"));
 			if(evt.isDefaultPrevented()) {
 		        e.preventDefault();
@@ -613,6 +616,9 @@
 		this.promise = $.proxy( def.promise, def );
 		return this.on("click", function(e){
 			var thisLink = $(this);
+			if(!thisLink.prop("href"))
+				return;
+			
 			var evt = ajaxAPI.triggerWith("ajaxgetting", thisLink.prop("href"));
 			if(evt.isDefaultPrevented()) {
 		        e.preventDefault();
