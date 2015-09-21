@@ -1,0 +1,115 @@
+.transition-single-prop(@property, @duration, @delay, @ease) when (@property = transform) {
+	-webkit-transition+: e("-webkit-transform") @duration @delay @ease;
+	-moz-transition+: e("-moz-transform") @duration @delay @ease;
+	-o-transition+: e("-o-transform") @duration @delay @ease;
+	transition+: e("transform") @duration @delay @ease;
+}
+
+.transition-single-prop(@property, @duration, @delay, @ease) when (default()) {
+	-webkit-transition+: @property @duration @delay @ease;
+	-moz-transition+: @property @duration @delay @ease;
+	-o-transition+: @property @duration @delay @ease;
+	transition+: @property @duration @delay @ease;
+}
+
+.transition-single(@properties, @i, @duration, @delay, @ease) when (@i <= length(@properties)) {
+	.transition-single-prop(extract(@properties, @i), @duration, @delay, @ease);
+	.transition-single(@properties, @i + 1, @duration, @delay, @ease);
+}
+.transition(@duration, @properties: all, @ease: ease-in-out, @delay: 0s) {
+	.transition-single(@properties, 1, @duration, @delay, @ease);
+}
+
+.contrastHover(@color) {
+	.contrastHoverBase(@colorContrast) when (lightness(@colorContrast) > 50%){
+		color: darken(@colorContrast, 30%);
+	}
+	.contrastHoverBase(@colorContrast) when (lightness(@colorContrast) <= 50%){
+		color: lighten(@colorContrast, 30%);
+	}
+	
+	@colorContrast: contrast(@color, #333, difference(#ffffff, #333333), 50%);
+	.transition(0.2s, color);
+	.contrastHoverBase(@colorContrast);
+	&:hover {
+		color: @colorContrast;
+	}
+}
+
+.vertically-centered(@fontsize: 16px) {
+	font-size: 0px;
+	&:before {
+		content: "";
+		height: 100%;	
+		vertical-align: middle;
+		display: inline-block;	
+	}
+	& > * {
+		vertical-align: middle;
+		display: inline-block;
+		font-size: @fontsize;
+	}
+}
+
+.gradient(@from, @to, @rad: 0deg) {
+	@fixedRad: -(abs(@rad)) + 90deg;
+	background: -moz-linear-gradient(@fixedRad, @from 0%, @to 100%);
+	background: -webkit-linear-gradient(@fixedRad, @from 0%, @to 100%); 
+	background: -o-linear-gradient(@fixedRad, @from 0%, @to 100%); 
+	background: -ms-linear-gradient(@fixedRad, @from 0%, @to 100%); 
+	background: linear-gradient(@rad, @from 0%, @to 100%); 
+}
+.gradientCenter(@from, @to, @rad: 0deg) {
+	@fixedRad: -(abs(@rad)) + 90deg;
+	background: -moz-linear-gradient(@fixedRad, @to 0%, @from 25%, @from 75%, @to 100%);
+	background: -webkit-linear-gradient(@fixedRad, @to 0%, @from 25%, @from 75%, @to 100%); 
+	background: -o-linear-gradient(@fixedRad, @to 0%, @from 25%, @from 75%, @to 100%); 
+	background: -ms-linear-gradient(@fixedRad, @to 0%, @from 25%, @from 75%, @to 100%); 
+	background: linear-gradient(@rad, @to 0%, @from 25%, @from 75%, @to 100%); 
+}
+.twoColor(@left, @to, @rad: 0deg){
+	@fixedRad: -(abs(@rad)) + 90deg;
+	background: -moz-linear-gradient(@fixedRad, @left 0%, @left 50%, @to 50%, @to 100%);
+    background: -webkit-linear-gradient(@fixedRad, @left 0%, @left 50%, @to 50%, @to 100%);
+    background: -o-linear-gradient(@fixedRad, @left 0%, @left 50%, @to 50%, @to 100%);
+    background: -ms-linear-gradient(@fixedRad, @left 0%, @left 50%, @to 50%, @to 100%);
+    background: linear-gradient(@rad, @left 0%, @left 50%, @to 50%, @to 100%);
+}
+
+.rotate(@deg: 0deg) {
+	-webkit-transform: rotate(@deg); 
+	-moz-transform: rotate(@deg); 
+	-o-transform: rotate(@deg);
+	-ms-transform: rotate(@deg); 
+	transform: rotate(@deg); 
+	//.transition(0.5s, -webkit-transform -moz-transform -o-transform -ms-transform transform);
+}
+
+.border-radius(@px: 5px) {
+	-webkit-border-radius: @px;
+	-moz-border-radius: @px;
+	border-radius: @px;
+}
+
+.cssTriangle(@direction, @color: #333, @width: 20px, @height: 10px) {
+	content: "";
+	width: 0;
+	height: 0;
+	border-style: solid;
+}
+.cssTriangle(@direction, @color: #333, @width: 20px, @height: 10px) when(@direction = bottom) {
+	border-width: @height (@width/2) 0 (@width/2);
+	border-color: @color transparent transparent transparent;
+}
+.cssTriangle(@direction, @color: #333, @width: 20px, @height: 10px) when(@direction = left) {
+	border-width: (@width/2) @height (@width/2) 0;
+	border-color: transparent @color transparent transparent;
+}
+.cssTriangle(@direction, @color: #333, @width: 20px, @height: 10px) when(@direction = top) {
+	border-width: 0 (@width/2) @height (@width/2);
+	border-color: transparent transparent @color transparent;
+}
+.cssTriangle(@direction, @color: #333, @width: 20px, @height: 10px) when(@direction = right) {
+	border-width: (@width/2) 0 (@width/2) @height;
+	border-color: transparent transparent transparent @color;
+}
