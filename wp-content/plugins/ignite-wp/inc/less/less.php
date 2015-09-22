@@ -41,7 +41,7 @@ function file_absolute_mtime($lessFilePath) {
 		$thisFilePath = realpath($thisFilePath);
 
 		if(!isset($filesToBeIncluded[$thisFilePath]))
-			$filesToBeIncluded[$thisFilePath] = filemtime($thisFilePath);
+			$filesToBeIncluded[$thisFilePath] = file_absolute_mtime($thisFilePath);
 
 	}
 	$m = @filemtime($lessFilePath);
