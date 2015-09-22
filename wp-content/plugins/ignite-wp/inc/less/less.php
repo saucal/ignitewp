@@ -34,8 +34,12 @@ function file_absolute_mtime($lessFilePath) {
 		}
 
 		if(!file_exists($thisFilePath)){
-			$filesToBeIncluded[$thisFilePath] = time() + 60; //set this to the future so we force recompiling
-			continue;
+			if(!file_exists($thisFilePath.".less")) {
+				$filesToBeIncluded[$thisFilePath] = time() + 60; //set this to the future so we force recompiling
+				continue;
+			} else {
+				$thisFilePath .= ".less";
+			}
 		}
 
 		$thisFilePath = realpath($thisFilePath);
