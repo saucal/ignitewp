@@ -77,6 +77,7 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 	$attrs = $params;
 
 	$attrs["suppress_filters"] = false;
+	$attrs["post_status"] = "publish";
 
 	if(!empty($attrs["single"]) && !is_array($attrs["single"])){
 		$attrs["single"] = array($attrs["single"]);
