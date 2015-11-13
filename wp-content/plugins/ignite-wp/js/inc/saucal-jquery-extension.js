@@ -1050,5 +1050,17 @@
 			window.location.href = url;
 		}
 	}
+
+	$.fn.onThrottle = function() {
+		var args = _.toArray(arguments);
+		var i;
+		if(typeof args[1] == "function") {
+			i = 1;
+		} else if(typeof args[2] == "function") {
+			i = 2;
+		}
+		args[i] = _.throttle(args[i], 10, {trailing: false});
+		return this.on.apply(this, args);
+	}
 	
 })(jQuery)
