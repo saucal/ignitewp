@@ -5,17 +5,28 @@
 	var fetchData = _.debounce(_fetchData, 100); 
 
 	var cached_width, cached_height;
-
-	$.ignitebox = {
-		elementsAttached: ["caption", "prev", "next"],
+	var defaults = {
 		buttonContent: {
 			"caption": "",
 			"prev": "prev",
 			"next": "next",
 			"close": "X",
-			"comments": "talk"
-		}
+			"comments": "talk",
+			"caption-open": "^",
+			"caption-close": "\\/",
+		},
+		commentsEnabled: true,
+		collapsibleCaption: false
 	};
+	$(function(){
+		$.ignitebox = $.extend(true, {}, defaults, $.ignitebox);
+		if(_.isUndefined($.ignitebox.elementsAttached)) {
+			$.ignitebox.elementsAttached = ["caption", "prev", "next"]
+		}
+		if(!_.isArray($.ignitebox.elementsAttached)) {
+			$.ignitebox.elementsAttached = [];
+		}
+	})
 
 	$(document).on("infinite-loaded contentReady ready", function(e, post){
 		if(!post)
@@ -173,28 +184,48 @@
 			var elem;
 			if(item == "caption"){
 				elem = newDiv("ignitebox-area-"+item).append(newDiv("ignitebox-area-caption-text")).appendTo(appendTo);
+				if($.ignitebox.collapsibleCaption) {
+					elem.addClass('toggleable')
+					var openComments = newElem("a", "ignitebox-toggle-caption", {
+						href: "#"
+					}).html($.ignitebox.buttonContent["caption-open"]).prependTo(elem);
+					openComments.on("click", function(e){
+						e.preventDefault();
+						e.stopPropagation();
+						elem.toggleClass('caption-visible');
+						if(elem.hasClass('caption-visible')) {
+							openComments.html($.ignitebox.buttonContent["caption-close"]);
+						} else {
+							openComments.html($.ignitebox.buttonContent["caption-open"]);
+						}
+					})
+				}
 			}
 			if(!elem){
 				var elem = newElem("a", "ignitebox-action-"+item, {
 					"href": "#"
 				}).html($.ignitebox.buttonContent[item]).appendTo(appendTo);
-				if(item == "comments"){
-					var commArea = newDiv("ignitebox-comment-area").insertAfter(elem);
-					elem.appendTo(commArea);
-					var commentWrap = newDiv("ignitebox-comment-area-inner-wrap").appendTo(commArea);
-					//calc scroll width
-					commentWrap.css({
-						"width": "10000px",
-						"overflow-y": "scroll"
-					});
-					var scrollWidth = 10000 - commentWrap.get(0).clientWidth;
-					commentWrap.removeAttr('style');
-					//end calc scroll width
-					var closeCont = newDiv("ignitebox-comment-close-cont").css("right", scrollWidth).appendTo(commentWrap);
-					var closeButton = newElem("a", "ignitebox-action-close-comments", {
-						"href": "#"
-					}).html($.ignitebox.buttonContent["close"]).appendTo(closeCont);
-					var commSubCont = newDiv("ignitebox-comment-container").appendTo(commentWrap);
+				if(item == "comments") {
+					if($.ignitebox.commentsEnabled) {
+						var commArea = newDiv("ignitebox-comment-area").insertAfter(elem);
+						elem.appendTo(commArea);
+						var commentWrap = newDiv("ignitebox-comment-area-inner-wrap").appendTo(commArea);
+						//calc scroll width
+						commentWrap.css({
+							"width": "10000px",
+							"overflow-y": "scroll"
+						});
+						var scrollWidth = 10000 - commentWrap.get(0).clientWidth;
+						commentWrap.removeAttr('style');
+						//end calc scroll width
+						var closeCont = newDiv("ignitebox-comment-close-cont").css("right", scrollWidth).appendTo(commentWrap);
+						var closeButton = newElem("a", "ignitebox-action-close-comments", {
+							"href": "#"
+						}).html($.ignitebox.buttonContent["close"]).appendTo(closeCont);
+						var commSubCont = newDiv("ignitebox-comment-container").appendTo(commentWrap);
+					} else {
+						elem.remove();
+					}
 				}
 			}
 		});
@@ -227,8 +258,10 @@
 			gallery.on("click", ".ignitebox-action-next", moveNext);
 			gallery.on("click", ".ignitebox-action-prev", movePrev);
 			gallery.on("click", ".ignitebox-action-close", closeGall);
-			gallery.on("click", ".ignitebox-action-comments", openComments);
-			gallery.on("click", ".ignitebox-action-close-comments", closeComments);
+			if($.ignitebox.commentsEnabled) {
+				gallery.on("click", ".ignitebox-action-comments", openComments);
+				gallery.on("click", ".ignitebox-action-close-comments", closeComments);
+			}
 
 			gallery.on("touchstart", swipeMaybe);
 			gallery.on("touchmove", swipeDoing);
@@ -410,6 +443,9 @@
 	function moveSlideTrigger(e, direction){
 		e.preventDefault();
 		var gallery = $(e.delegateTarget);
+		if($.ignitebox.collapsibleCaption) {
+			gallery.find(".ignitebox-area-caption.caption-visible").removeClass('caption-visible');
+		}
 		moveSlide(gallery, direction);
 	}
 	function moveSlide(gallery, direction) {
