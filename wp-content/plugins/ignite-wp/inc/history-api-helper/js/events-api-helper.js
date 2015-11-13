@@ -111,14 +111,14 @@
 		}
 
 		if(typeof url != "string" && typeof url != "undefined"){
-			if(Array.isArray(scope) && typeof params == "undefined")
+			if(jQuery.isArray(scope) && typeof params == "undefined")
 				params = scope;
 
 			scope = url;
 			url = undefined;
 		}
 
-		if(Array.isArray(scope) && typeof params == "undefined") {
+		if(jQuery.isArray(scope) && typeof params == "undefined") {
 			params = scope;
 			scope = undefined;
 		}
