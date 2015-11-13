@@ -54,7 +54,7 @@ function ignite_masonry_gallery($content, $attr ) {
 	$columns = intval( $atts['columns'] );
 	$itemwidth = $columns > 0 ? floor(100/$columns) : 100;
 	$float = is_rtl() ? 'right' : 'left';
-	$selector = "gallery-{$instance}";
+	$selector = "gallery-{$id}";
 	$gallery_style = '';
 	/**
 	 * Filter whether to print default gallery styles.
