@@ -5,94 +5,109 @@
 		return encodeURIComponent(str).replace(/!/g, '%21').replace(/'/g, '%27').replace(/\(/g, '%28').
 		replace(/\)/g, '%29').replace(/\*/g, '%2A');
 	}
-	function getNetworkDefaults(network) {
-		var socialNetworkDefaults = {
-			"mail": {
-				url: "mailto:",
-				html: '<i class="fa fa-envelope fa-fw"></i>',
-				hoverColor: "#CCCCCC",
-				vars: {
-					"subject": "title",
-					"body": "description"
+
+	var socialNetworkDefaults = {
+		"mail": {
+			url: "mailto:",
+			html: '<i class="fa fa-envelope fa-fw"></i>',
+			hoverColor: "#CCCCCC",
+			vars: {
+				"subject": "title",
+				"body": "description"
+			},
+			encoding: "raw"
+		},
+		"facebook": {
+			url: "https://www.facebook.com/sharer/sharer.php",
+			size: [500,370],
+			html: '<i class="fa fa-facebook fa-fw"></i>',
+			hoverColor: "#0c6ab2",
+			vars: {
+				"u": "url"
+			}
+		},
+		"twitter": {
+			url: "https://twitter.com/intent/tweet",
+			size: [500,370],
+			html: '<i class="fa fa-twitter fa-fw"></i>',
+			hoverColor: "#24a9e1",
+			vars: {
+				"url": "url",
+				"original_referer": "referer",
+				"text": "description"
+			}
+		},
+		"pinterest": {
+			url: "https://pinterest.com/pin/create/bookmarklet/",
+			size: [800,450],
+			html: '<i class="fa fa-pinterest fa-fw"></i>',
+			hoverColor: "#f8122c",
+			vars: {
+				"media": "url",
+				"url": "referer",
+				"description": "description"
+			}
+		},
+		"google-plus": {
+			url: "https://plus.google.com/share",
+			size: [480,460],
+			html: '<i class="fa fa-google-plus fa-fw"></i>',
+			hoverColor: "#e63a22",
+			vars: {
+				"url": "url"
+			} 
+		},
+		"linkedin": {
+			url: "http://www.linkedin.com/shareArticle",
+			size: [480,460],
+			html: '<i class="fa fa-linkedin fa-fw"></i>',
+			hoverColor: "#2d90d1",
+			vars: {
+				"mini": {
+					force: true
 				},
-				encoding: "raw"
-			},
-			"facebook": {
-				url: "https://www.facebook.com/sharer/sharer.php",
-				size: [500,370],
-				html: '<i class="fa fa-facebook fa-fw"></i>',
-				hoverColor: "#0c6ab2",
-				vars: {
-					"u": "url"
-				}
-			},
-			"twitter": {
-				url: "https://twitter.com/intent/tweet",
-				size: [500,370],
-				html: '<i class="fa fa-twitter fa-fw"></i>',
-				hoverColor: "#24a9e1",
-				vars: {
-					"url": "url",
-					"original_referer": "referer",
-					"text": "description"
-				}
-			},
-			"pinterest": {
-				url: "https://pinterest.com/pin/create/bookmarklet/",
-				size: [800,450],
-				html: '<i class="fa fa-pinterest fa-fw"></i>',
-				hoverColor: "#f8122c",
-				vars: {
-					"media": "url",
-					"url": "referer",
-					"description": "description"
-				}
-			},
-			"google-plus": {
-				url: "https://plus.google.com/share",
-				size: [480,460],
-				html: '<i class="fa fa-google-plus fa-fw"></i>',
-				hoverColor: "#e63a22",
-				vars: {
-					"url": "url"
-				} 
-			},
-			"linkedin": {
-				url: "http://www.linkedin.com/shareArticle",
-				size: [480,460],
-				html: '<i class="fa fa-linkedin fa-fw"></i>',
-				hoverColor: "#2d90d1",
-				vars: {
-					"mini": {
-						force: true
-					},
-					"url": "url"
-				}
-			},
-			"reddit": {
-				url: "http://www.reddit.com/static/button/button3.html",
-				size: null,
-				html: '<iframe src="REPLACE_URL" height="52" width="75" scrolling="no" frameborder="0"></iframe>',
-				hoverColor: null,
-				vars: {
-					"width": {
-						force: "69"
-					},
-					"url": "url"
+				"url": "url"
+			}
+		},
+		"reddit": {
+			url: "http://www.reddit.com/static/button/button3.html",
+			size: null,
+			html: '<iframe src="REPLACE_URL" height="52" width="75" scrolling="no" frameborder="0"></iframe>',
+			hoverColor: null,
+			vars: {
+				"width": {
+					force: "69"
 				},
-				iframed: true
+				"url": "url"
 			},
-			"reddit-alt": {
-				url: "http://www.reddit.com/submit",
-				size: null,
-				html: '<img src="http://www.reddit.com/static/spreddit5.gif" alt="submit to reddit" border="0" />',
-				hoverColor: null,
-				vars: {
-					"url": "url"
-				}
+			iframed: true
+		},
+		"reddit-alt": {
+			url: "http://www.reddit.com/submit",
+			size: null,
+			html: '<img src="http://www.reddit.com/static/spreddit5.gif" alt="submit to reddit" border="0" />',
+			hoverColor: null,
+			vars: {
+				"url": "url"
 			}
 		}
+	}
 
+	$.socialLinksIcons = function(networks, val){
+		if(typeof networks == "string") {
+			var newNw = {};
+			newNw[networks] = val;
+			networks = newNw;
+		}
+		$.each(networks, function(network, icon){
+			if(typeof socialNetworkDefaults[network] == "undefined")
+				return;
+
+			socialNetworkDefaults[network].html = icon;
+		});
+	}
+
+	function getNetworkDefaults(network) {
 		if(typeof socialNetworkDefaults[network] == "undefined")
 			return;
 
