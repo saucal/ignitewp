@@ -1,5 +1,5 @@
 <?php
-require_once SAUCAL_TPL_LIB_DIR(__FILE__)."/inc/"."phpQuery-onefile.php";
+add_ignite_support("dom_parser");
 require_once SAUCAL_TPL_LIB_DIR(__FILE__)."/inc/"."placehold_it.php";
 
 class Saucal_Lazy_Load_Patcher {
@@ -27,7 +27,10 @@ class Saucal_Lazy_Load_Patcher {
 		return "";
 	}
 	static function parse_lazy($html) {
-		$doc = phpQuery::newDocument($html, "text/html");
+		if(substr($html, 0, 5) == "<?xml")
+			return $html;
+		
+		$html = str_get_html($html, true, true, DEFAULT_TARGET_CHARSET, false);
 		$blankImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 		$placehold_it = new Placehold_it();
 		$selector_containers = apply_filters("lazy_load_selector_containers", array());
@@ -42,28 +45,28 @@ class Saucal_Lazy_Load_Patcher {
 		if(empty($fullSelector))
 			$fullSelector = $selector;
 
-		foreach(pq($fullSelector) as $node) {
-			$clone    = $node->cloneNode();
-			$noscript = pq("<noscript/>", $doc);
-			$noscript->append($clone)->insertBefore($node);
-			$node->setAttribute('data-src', $node->getAttribute('src'));
+		foreach($html->find($fullSelector) as $node) {
+			$origImg = $node->outertext."";
 
-			if($node->getAttribute('srcset')) {
-				$node->setAttribute('data-srcset', $node->getAttribute('srcset'));
-				$node->removeAttribute ( 'srcset' );
+			$node->{"data-src"} = $node->src;
+
+			if(isset($node->srcset)) {
+				$node->{"data-srcset"} = $node->srcset;
+				$node->srcset = null;
 			}
 
-			$width = $node->getAttribute('width');
-			$height = $node->getAttribute('height');
+			$width = $node->width;
+			$height = $node->height;
 			if($width && $height){
-				$node->setAttribute('src', $placehold_it->get($width, $height));
+				$node->src = $placehold_it->get($width, $height);
 			} else {
-				$node->setAttribute('src', $blankImage);
+				$node->src = $blankImage;
 			}
 
-			$node->setAttribute('class',    trim($node->getAttribute('class') . ' lazy'));
+			$node->class = trim($node->class . ' lazy');
+			$node->outertext = "<noscript>".$origImg."</noscript>".$node->outertext;
 		}
-		$new_html = $doc->htmlOuter();
+		$new_html = $html->save();
 		return $new_html;
 	}
 	function shutdown() {
