@@ -97,7 +97,7 @@ function ignite_maybe_compile_less($url) {
 
 
 		$root = rtrim(ABSPATH, "/\\");
-		$rootUrl = home_url();
+		$rootUrl = get_option('home');
 
 		$lessFilePath = str_replace($rootUrl, $root, $cleanUrl);
 		$lessFilePathBaseUrl = dirname($cleanUrl);
