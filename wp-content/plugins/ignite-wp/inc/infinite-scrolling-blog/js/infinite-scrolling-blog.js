@@ -173,14 +173,14 @@
 				var state = $.extend(true, {}, historyAPI.getState(), {
 					blog_post_id: id
 				});
-				if(document.URL != permalink){
-					if(historyAPI.getState()["blog_post_id"]) {
-						historyAPI.pushState(state, title, permalink);
-					} else {
-						historyAPI.replaceState(state, title, permalink);
-					}
-				} else if(!historyAPI.getState()["blog_post_id"]) {
-					historyAPI.replaceState(state, title, permalink);
+
+				if(typeof historyAPI.getState().blog_post_id != "undefined" && historyAPI.getState().blog_post_id == id) { //if post_id is the same, bail
+					return;
+				}
+				if(!urlsEqual(document.URL, permalink)) {
+					historyAPI.pushState(state, title, permalink);
+				} else {
+					historyAPI.replaceState(state, title);
 				}
 			}
 		}
