@@ -164,6 +164,11 @@
 		}
 	}
 
+	$(document).on("touchmove", function(e){
+		if($("body").hasClass('ignitebox-open'))
+			e.preventDefault();
+	})
+
 	function openGallery(gallery) {
 		return function(e){
 			var thisLink = $(this);
