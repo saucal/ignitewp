@@ -131,7 +131,7 @@ class Saucal_Walker_Comment extends Walker_Comment {
 		<?php comment_text( get_comment_id(), array_merge( $args, array( 'add_below' => $add_below, 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?>
 
 		<div class="comment-meta commentmetadata">
-			<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID, $args ) ); ?>">
+			<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID, $args ) ); ?>" class="comment-direct-link">
 				<?php printf( __( '%1$s at %2$s' ), get_comment_date(),  get_comment_time() ); ?>
 			</a>
 			<span class="btns">

@@ -1,5 +1,5 @@
 (function($){
-	$(document).on("click", "a.load-comments", function(e) {
+	$(document).on("click load-instantly", "a.load-comments", function(e) {
 		e.preventDefault();
 		e.stopPropagation();
 		var prev = $("#comments-template");
@@ -23,7 +23,15 @@
 
 		template.find("#commentform").attr("data-thread-id", tID).data("thread-id", tID);
 
-		template.hide().insertBefore(insterBefore).slideDown();
+		template.hide().insertBefore(insterBefore)
+
+		if(e.type != "load-instantly") {
+			template.slideDown();
+			var origTop = $(window).scrollTop();
+			window.location.hash = "#comments";
+			$(window).scrollTop(origTop);
+		} else
+			template.show();
 
 		template.on("remove-comments", function() {
 			insterBefore.show();
