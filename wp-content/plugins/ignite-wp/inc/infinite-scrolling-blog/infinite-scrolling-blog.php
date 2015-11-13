@@ -218,7 +218,7 @@ add_action("pre_get_posts", function($wp_query){
 	if($wp_query->is_main_query() && !is_admin()){
 		if($wp_query->get("post_type") == "" || $wp_query->get("post_type") == "post") {
 			global $infiniteScrollConfig;
-			$wp_query->set("posts_per_page", $infiniteScrollConfig["posts_initially_loaded"]);
+			$wp_query->set("posts_per_page", min($infiniteScrollConfig["posts_initially_loaded"], $infiniteScrollConfig["posts_before_button"]));
 		}
 	}
 });
