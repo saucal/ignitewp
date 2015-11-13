@@ -115,6 +115,9 @@
     	title = HTMLtoText(title);
     	this.trigger(evt, [href]);
     	if(historyAPI.historyApiSupported() && !evt.isDefaultPrevented()){
+    		if(typeof href == "undefined")
+    			href = window.location.href;
+
     		history.replaceState({
     			ajaxAPI: {
     				state: state,
