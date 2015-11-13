@@ -1,0 +1,48 @@
+.ignitewall {
+  margin: -7px;
+}
+.ignitewall:before,
+.ignitewall:after {
+  content: " ";
+  display: table;
+}
+.ignitewall:after {
+  clear: both;
+}
+.ignitewall .iw-item {
+  float: left;
+  padding: 7px;
+}
+.ignitewall .iw-item .iw-bg-parent {
+  position: relative;
+  height: 200px;
+  background: #DCDCDC;
+  overflow: hidden;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.ignitewall .iw-item .iw-bg-parent img {
+  max-height: 100%;
+  width: auto;
+}
+.ignitewall .iw-item .iw-bg-parent a {
+  display: block;
+  height: 100%;
+}
+.ignitewall .iw-item .iw-bg-parent a .plus-symbol {
+  position: absolute;
+  z-index: 1;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  font-size: 60px;
+  line-height: 200px;
+  text-align: center;
+  background-color: rgba(51, 51, 51, 0.6);
+  color: white;
+}
+.ignitewall .iw-item .iw-bg-parent a:hover .plus-symbol {
+  color: #d9d9d9;
+}
