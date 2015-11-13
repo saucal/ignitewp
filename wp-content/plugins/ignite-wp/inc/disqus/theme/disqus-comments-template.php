@@ -2,9 +2,12 @@
 if (DISQUS_DEBUG) {
     echo "<p><strong>Disqus Debug</strong> thread_id: ".get_post_meta($post->ID, 'dsq_thread_id', true)."</p>";
 }
+
+$thread_ID = "post_".get_the_id();
+
 ?>
 
-<div id="disqus_thread_post_<?php the_ID(); ?>" class="disqus_thread" data-thread-id="post_<?php the_ID(); ?>">
+<div id="disqus_thread_<?php echo $thread_ID; ?>" class="disqus_thread" data-thread-id="<?php echo $thread_ID; ?>">
     <?php if (!get_option('disqus_disable_ssr') && have_comments() && is_singular()): ?>
         <?php
         // if (is_file(TEMPLATEPATH . '/comments.php')) {
@@ -42,12 +45,12 @@ if (DISQUS_DEBUG) {
 </div>
 
 <?php if(apply_filters("ignite-disqus-lazy", false)): ?>
-<div class="lazy-load-disqus"><a href="#" data-thread-id="post_<?php the_ID(); ?>"><?php echo apply_filters("ignite-disqus-lazy-button-text", "<span>Lazy Comments</span>"); ?></a></div>
+<div class="lazy-load-disqus"><a href="#" data-thread-id="<?php echo $thread_ID; ?>"><?php echo apply_filters("ignite-disqus-lazy-button-text", "<span>Lazy Comments</span>"); ?></a></div>
 <?php endif; ?>
 
 <script type="text/javascript">
 /* <![CDATA[ */
-    disqus_configs["post_<?php the_ID(); ?>"] = {
+    disqus_configs["<?php echo $thread_ID; ?>"] = {
         page: {
             url: '<?php echo get_permalink(); ?>',
             identifier: '<?php echo dsq_identifier_for_post($post); ?>',
@@ -59,12 +62,12 @@ if (DISQUS_DEBUG) {
     $sso = dsq_sso();
     if ($sso) {
         foreach ($sso as $k=>$v) {
-            echo "disqus_configs[\"post_<?php the_ID(); ?>\"].page.{$k} = '{$v}';\n";
+            echo "disqus_configs[\"<?php echo $thread_ID; ?>\"].page.{$k} = '{$v}';\n";
         }
-        echo "disqus_configs[\"post_<?php the_ID(); ?>\"].".dsq_sso_login();
+        echo "disqus_configs[\"<?php echo $thread_ID; ?>\"].".dsq_sso_login();
     }
     ?>
-    current_disqus_config = "post_<?php the_ID(); ?>";
+    current_disqus_config = "<?php echo $thread_ID; ?>";
 
     <?php if (false && get_option('disqus_developer')): ?>
         var disqus_developer = 1;
