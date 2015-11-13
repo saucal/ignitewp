@@ -301,6 +301,9 @@
     	this.triggerWith("showingPage", content, [content]);
 		this.triggerWithOnce("contentReady", location.href, content, [content] );
 		this.triggerWith("contentLoad", content, [content]);
+		content.imagesLoaded().always(function(){
+			ajaxAPI.triggerWith( "contentLoaded", location.href, content, [content] );
+		});
 		this.triggerWithOnce( "contentFirstLoad", content, [content] );
     }
     SAUCAL_AJAX_API.prototype.markLinks = function(href){
@@ -524,7 +527,9 @@
 			ajaxAPI.triggerWith( "contentLoad", href, newContent, [newContent] );
 			ajaxAPI.triggerWithOnce( "contentFirstLoad", href, newContent, [newContent] );
 			newContent.fadeIn(200, function(){
-				ajaxAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+				newContent.imagesLoaded().always(function(){
+					ajaxAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+				});
 				currContent.add(newContent).removeClass('ajax-leaving ajax-entering');
 			});
 			ajaxAPI.triggerWith( "afterInitShow", href, newContent, [newContent] );
@@ -577,7 +582,9 @@
 			thisAPI.triggerWith( "contentLoad", href, newContent, [newContent] );
 			thisAPI.triggerWithOnce( "contentFirstLoad", href, newContent, [newContent] );
 			newContent.fadeIn(200, function(){
-				thisAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+				newContent.imagesLoaded().always(function(){
+					thisAPI.triggerWith( "contentLoaded", href, newContent, [newContent] );
+				});
 				currContent.add(newContent).removeClass('ajax-leaving ajax-entering');
 				def.resolveWith(newContent, [newContent]);
 			});

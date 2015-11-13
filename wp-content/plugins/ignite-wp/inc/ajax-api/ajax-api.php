@@ -1,5 +1,6 @@
 <?php
 add_ignite_support("history-api-helper");
+add_ignite_support("js-imagesloaded");
 
 if((isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') || isset($_REQUEST["iframed"])) {
     define("SAUCAL_IS_AJAX_REQUEST", true);
@@ -28,7 +29,7 @@ function saucal_get_footer(){
 }
 
 add_action( "init", function(){
-    wp_register_script( SAUCAL_TPL_ID."-ajax-api", SAUCAL_TPL_LIB_URL(__FILE__)."/js/ajax-api.js", array(), "3.0", false );
+    wp_register_script( SAUCAL_TPL_ID."-ajax-api", SAUCAL_TPL_LIB_URL(__FILE__)."/js/ajax-api.js", array("jquery-imagesloaded"), "4.0", false );
 });
 
 add_action( "wp_enqueue_scripts", function(){
