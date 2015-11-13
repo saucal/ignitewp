@@ -77,6 +77,12 @@
 			var gallery = thisLink.parents(".gallery").first();
 
 			if(gallery.length == 0)
+				gallery = thisLink.parents(".ignitewall").first();
+
+			if(gallery.length == 0)
+				gallery = thisLink.parents(".ib-gallery").first();
+
+			if(gallery.length == 0)
 				gallery = thisLink.parents(".post-content").first();
 			
 			thisLink.data("ignitebox-gallery", gallery);
