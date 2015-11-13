@@ -176,10 +176,10 @@
 			return $();
 
 		$.each(data.vars, function(i, item){
-			if(typeof item == "string"){
-				data.vars[i] = config[item];
-			} else {
+			if(typeof item == "object"){
 				data.vars[i] = item.force;
+			} else {
+				data.vars[i] = config[item];
 			}
 		});
 
