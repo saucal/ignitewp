@@ -46,7 +46,7 @@
 	        historyAPI.trigger(evt, fixed);
 	        self.popping = false;
 	        if(!evt.isDefaultPrevented() && fixed[1] !== null) {
-	        	this.lastURL = location.href;
+	        	self.lastURL = location.href;
 	        	historyAPI.doPopState.apply(historyAPI, fixed);
 	        }
 	    });
