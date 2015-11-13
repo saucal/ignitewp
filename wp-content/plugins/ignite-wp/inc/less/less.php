@@ -59,7 +59,7 @@ function file_absolute_mtime($lessFilePath) {
 }
 
 function ignite_maybe_compile_less($url) {
-	if(strpos($url, ".less") !== false){
+	if(strpos($url, ".less") !== false && strpos($url, ".lessc") === false){
 		require_once SAUCAL_TPL_LIB_DIR(__FILE__) . '/inc/lessc.inc.php';
 		$compiled = false;
 
@@ -143,6 +143,15 @@ function ignite_maybe_compile_less($url) {
 	}
 	return $url;
 }
+
+add_filter("print_styles_array", function($todo){
+	global $wp_styles;
+	foreach ($todo as $handle) {
+		$style = $wp_styles->registered[$handle];
+		$style->src = ignite_maybe_compile_less($style->src);
+	}
+	return $todo;
+}, 99);
 
 add_filter("style_loader_src", "ignite_maybe_compile_less");
 
