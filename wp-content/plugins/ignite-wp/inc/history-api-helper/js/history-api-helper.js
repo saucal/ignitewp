@@ -150,6 +150,34 @@
 		if(typeof _gaq != "undefined") {
 			_gaq.push(['_trackPageview', analyticsPath]);
 		}
+		if(typeof leadin != "undefined") {
+			if(typeof leadin.analytics == "undefined") 
+				leadin.analytics = {};
+			
+			leadin.analytics.trackingUrl = this.leadinAnalytics(url);
+		}
+    }
+    SAUCAL_HISTORY_API.prototype.leadinAnalytics = function(url) {
+    	var now, e, t, el;
+
+		now = Date.now || function() { return +(new Date); };
+		e = {
+			k: 1,
+			a: leadin.config.portalId,
+			vi: leadin.utils.getUtk(),
+			cts: now(),
+			t: document.title
+		};
+		if(historyAPI.lastURL !== url)
+			e.r = historyAPI.lastURL;
+
+		t = leadin.utils.encodeQueryString(e);
+		t = "//" + leadin.config.analyticsDomain + "/__ptq.gif?" + t;
+
+		el = document.createElement("img");
+    	el.src = t;
+
+    	return t;
     }
 
     SAUCAL_HISTORY_API.prototype.getState = function(){
