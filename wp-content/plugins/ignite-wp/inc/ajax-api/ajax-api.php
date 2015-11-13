@@ -28,6 +28,22 @@ function saucal_get_footer(){
     }
 }
 
+add_filter( 'clean_url', function($url, $original_url, $context){
+    if($context == "bypass-clean-filter")
+        return $url;
+
+    if(strpos($url, "iframed=") == false)
+        return $url;
+
+    return esc_url(add_query_arg( "iframed", false, $original_url ), null, "bypass-clean-filter");
+}, 10, 3);
+add_filter( 'wp_redirect', function($url) {
+    if(isset($_REQUEST["iframed"]))
+        $url = add_query_arg( "iframed", $_REQUEST["iframed"], $url );
+
+    return $url;
+});
+
 add_action( "init", function(){
     wp_register_script( SAUCAL_TPL_ID."-ajax-api", SAUCAL_TPL_LIB_URL(__FILE__)."/js/ajax-api.js", array("jquery-imagesloaded"), "4.0", false );
 });
