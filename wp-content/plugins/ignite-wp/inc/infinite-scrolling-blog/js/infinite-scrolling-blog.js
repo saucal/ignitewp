@@ -26,7 +26,7 @@
 	}
 	$.fn.getViewport = function(){
 		var viewportElem = $(this);
-		if(viewportElem.is("html"))
+		if(viewportElem.is("html") || viewportElem.is(document))
 			viewportElem = $(window);
 
 		var viewport = {};
@@ -75,7 +75,7 @@
 		if(scrollingParent.is("body"))
 			scrollingParent = scrollingParent.closest("html");
 
-		if(scrollingParent.is("html")) {
+		if(scrollingParent.is("html") || scrollingParent.is(document)) {
 			//scrollingParent = $(window);
 			if(scrollingParent.data("window.patched"))
 				return scrollingParent;
@@ -86,7 +86,7 @@
 				if(bubbled)
 					return;
 				bubbled = true;
-				scrollingParent.trigger("maybeLoad");
+				scrollingParent.trigger("scroll");
 				bubbled = false;
 			});
 
@@ -613,7 +613,6 @@
 			//Post loading triggers
 			var firstPost = allPosts.first();
 			var lastPost = allPosts.last();
-			console.log(direction);
 			if(direction < 0) {
 				var postsAfterButton = allPosts.length;
 				if(dividerLines.length > 0) {
