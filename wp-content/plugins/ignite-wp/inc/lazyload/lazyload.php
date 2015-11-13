@@ -10,7 +10,7 @@ class Saucal_Lazy_Load_Patcher {
 		add_action("shutdown", array($this, "shutdown"));
 	}
 	function init(){
-		wp_register_script( "lazy-load-xt", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.min.js", array("jquery"), "1.0.5", false );
+		wp_register_script( "lazy-load-xt", SAUCAL_TPL_LIB_URL(__FILE__)."/js/jquery.lazyloadxt.min.js", array("jquery"), "1.0.6-ms", false );
 		wp_register_script( "lazy-load-xt-srcset", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.srcset.min.js", array("lazy-load-xt"), "1.0.5", false );
 		wp_register_style( "lazy-load-xt-fadein", "//cdnjs.cloudflare.com/ajax/libs/jquery.lazyloadxt/1.0.5/jquery.lazyloadxt.fadein.min.css", array(), "1.0.5" );
 		wp_register_script( "saucal-lazy-load-xt-integration", SAUCAL_TPL_LIB_URL(__FILE__)."/js/lazyloadxt-integration.js", array("jquery"), "1.0", false );

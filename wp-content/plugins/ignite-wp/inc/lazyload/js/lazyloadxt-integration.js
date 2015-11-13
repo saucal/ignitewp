@@ -1,5 +1,5 @@
 (function($){
-	$(document).on("infinite-loaded contentReady", function(e, post){
+	$(document).on("infinite-loaded contentLoad", function(e, post){
 		if(post){
 			post.find($.lazyLoadXT.selector).lazyLoadXT();
 		}
