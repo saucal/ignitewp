@@ -465,8 +465,9 @@
 
 			var thisIsIt = item.element;
 			var thisIsThat = item.$element;
+			var isWindow = thisIsIt === window || thisIsIt === document;
 
-			if(thisIsIt !== window) {
+			if(!isWindow) {
 				item.cssOldWidth = thisIsThat.get(0).style.width;
 				item.cssOldHeight = thisIsThat.get(0).style.height;
 			}
@@ -482,8 +483,9 @@
 
 			var thisIsIt = item.element;
 			var thisIsThat = item.$element;
-			if(thisIsIt === window || thisIsThat.css("display") !== "none"){
-				if(thisIsIt == window){
+			var isWindow = thisIsIt === window || thisIsIt === document;
+			if(isWindow || thisIsThat.css("display") !== "none"){
+				if(isWindow){
 					item.widthn = thisIsThat.width(),
 					item.heightn = thisIsThat.height();
 				} else {
