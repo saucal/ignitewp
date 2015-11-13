@@ -102,7 +102,9 @@
 				}
 			}, title, href);
     		document.title = title;
-    		this.analyticsPush(title, href);
+    		if(!urlsEqual(href, this.lastURL))
+    			this.analyticsPush(title, href);
+
         	this.lastURL = href;
     		this.popped = true;
     	}
@@ -120,7 +122,8 @@
 				}
 			}, title, href);
     		document.title = title;
-    		this.analyticsPush(title, href);
+    		if(!urlsEqual(href, this.lastURL))
+    			this.analyticsPush(title, href);
         	this.lastURL = href;
     	}
     	return evt;
