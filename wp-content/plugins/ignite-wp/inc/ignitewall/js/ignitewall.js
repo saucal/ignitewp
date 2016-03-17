@@ -1,18 +1,61 @@
 (function($){
-
-	function igniteWall(elems, options) {
-		options = $.extend(true, {
+    function checkViewport(viewportList) {
+        var winWidth = $(window).width();
+        if(winWidth >= 1200 && viewportList.indexOf("lg") >= 0) {
+            return true;
+        }
+        if(winWidth >= 992 && winWidth <= 1199 && viewportList.indexOf("md") >= 0) {
+            return true;
+        }
+        if(winWidth >= 768 && winWidth <= 991 && viewportList.indexOf("sm") >= 0) {
+            return true;
+        }
+        if(winWidth <= 767 && viewportList.indexOf("xs") >= 0) {
+            return true;
+        }
+        return false;
+    }
+    function ifUndefined(val, def) {
+        if(typeof val == "undefined")
+            return def;
+        return val;
+    }
+	function igniteWall(elems, globalOptions) {
+		globalOptions = $.extend(true, {
 			tolerance: 0.2,
 			elementSelector: ".iw-item",
 			bgParentSelector: ".iw-bg-parent"
-		}, options);
+		}, globalOptions);
 		
 		return $(elems).each(function(){
-			var thisFreewall = $(this);
+			var thisFreewall = $(this), thisEl = thisFreewall;
 			if(thisFreewall.data("ignitewall"))
 				return;
 
 			thisFreewall.data("ignitewall", true);
+
+			var options = $.extend(true, {}, globalOptions, {
+                destroyIn: ifUndefined(thisFreewall.data("destroy-in"), ""),
+			})
+
+            if(options.destroyIn)
+                options.destroyIn = options.destroyIn.split(" ");
+            else
+                options.destroyIn = [];
+
+            if(options.destroyIn.length > 0 && typeof thisEl.data("ignitewall-watching") == "undefined") {
+                thisEl.data("ignitewall-watching", true);
+                function watchThis(){
+                    if(checkViewport(options.destroyIn)) {
+                        thisEl.ignitewallDestroy();
+                    } else {
+                        thisEl.ignitewall();
+                    }
+                }
+                $(window).on("resize", watchThis);
+                setTimeout(watchThis, 0);
+            }
+
 			var getRowsMax = function(){
 				var width = $(window).width();
 				var type = "xs";
@@ -41,6 +84,9 @@
 
 			var checkGrid = function(){
 				var thisCheck = function(){
+					if(!thisFreewall.data("ignitewall"))
+						return; 
+					
 					items.css({
 						"width": "",
 						"display": ""
@@ -119,7 +165,18 @@
 			}
 
 			checkGrid();
-			$(window).on("resize", _.debounce(checkGrid, 200));
+			var debouncedCheckGrid = _.debounce(checkGrid, 200)
+			$(window).on("resize", debouncedCheckGrid);
+			thisEl.data("ignitewall-destroy", function(){
+				$(window).off("resize", debouncedCheckGrid);
+				thisEl.removeData("ignitewall");
+				thisEl.removeData("ignitewall-destroy");
+				thisEl.find(".plus-symbol").remove();
+				items.css({
+					"display": "",
+					"width": ""
+				})
+			})
 		})
 	}
 
@@ -130,4 +187,9 @@
 	$.fn.ignitewall = function(options){
 		return igniteWall(this, options);
 	}
+	$.fn.ignitewallDestroy = function(){
+        var fn = $(this).data("ignitewall-destroy");
+        if(fn)
+            fn();
+    }
 })(jQuery)
