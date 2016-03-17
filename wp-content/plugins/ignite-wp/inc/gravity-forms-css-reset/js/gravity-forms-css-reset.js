@@ -15,4 +15,7 @@
 			thisBtn.detach();
 		})
 	})
+	$(document).on("contentReady", function(){
+		if(gformInitDatepicker) gformInitDatepicker();
+	});
 })(jQuery)
