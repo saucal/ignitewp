@@ -297,7 +297,12 @@
 	}
     SAUCAL_AJAX_API.prototype.init = function(){
     	var content = $(this.config.contentSelector);
-    	contentBuffer.add(content);
+    	var bufferData = {};
+    	ajaxAPI.trigger("beforeBufferInit", content, bufferData);
+		bufferData = {
+			data: bufferData
+		};
+		contentBuffer.add(content, window.location.href, bufferData);
     	this.triggerWith("showingPage", content, [content]);
 		this.triggerWithOnce("contentReady", location.href, content, [content] );
 		this.triggerWith("contentLoad", content, [content]);
