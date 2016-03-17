@@ -24,7 +24,7 @@ function saucal_get_footer(){
     if(!SAUCAL_IS_AJAX_REQUEST){
         get_footer();
     } else {
-    	do_action("saucal_ajax_get_header");
+    	do_action("saucal_ajax_get_footer");
     }
 }
 
