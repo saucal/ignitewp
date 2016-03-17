@@ -34,18 +34,14 @@ function file_absolute_mtime($lessFilePath) {
 		}
 
 		if(!file_exists($thisFilePath)){
-			if(!file_exists($thisFilePath.".less")) {
-				$filesToBeIncluded[$thisFilePath] = time() + 60; //set this to the future so we force recompiling
-				continue;
-			} else {
-				$thisFilePath .= ".less";
-			}
+			$filesToBeIncluded[$thisFilePath] = time() + 60; //set this to the future so we force recompiling
+			continue;
 		}
 
 		$thisFilePath = realpath($thisFilePath);
 
 		if(!isset($filesToBeIncluded[$thisFilePath]))
-			$filesToBeIncluded[$thisFilePath] = file_absolute_mtime($thisFilePath);
+			$filesToBeIncluded[$thisFilePath] = filemtime($thisFilePath);
 
 	}
 	$m = @filemtime($lessFilePath);
