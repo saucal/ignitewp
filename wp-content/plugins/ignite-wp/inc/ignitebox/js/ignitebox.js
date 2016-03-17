@@ -32,7 +32,7 @@
 		if(!post)
 			post = $(document);
 
-		post.find('a[href$=".png"], a[href$=".jpg"], a[href$=".gif"], a[rel^="attachment "], .gallery a, .wp-caption > a').each(function(){
+		post.find('a[href$=".png"], a[href$=".jpg"], a[href$=".jpeg"], a[href$=".gif"], a[rel^="attachment "], .gallery a, .wp-caption > a').each(function(){
 			var thisLink = $(this);
 			if(typeof thisLink.data("ingitebox-init-def") != "undefined") //if we initialized this already, skip
 				return;
@@ -84,6 +84,9 @@
 
 			if(gallery.length == 0)
 				gallery = thisLink.parents(".post-content").first();
+
+			if(gallery.length == 0)
+				gallery = thisLink.parents(".hentry").first();
 			
 			thisLink.data("ignitebox-gallery", gallery);
 			gallery.data("ignitebox-pictures", []);
@@ -180,6 +183,12 @@
 			var thisLink = $(this);
 			var goTo = thisLink.data("ignitebox-gallery-index");
 			e.preventDefault();
+
+			if(gallery.data("ignitebox-filter")) {
+				var filtered = thisLink.filter(gallery.data("ignitebox-filter"));
+				if(!filtered.length)
+					return;
+			}
 
 			var gallDisplay = drawGallery(gallery.data("ignitebox-pictures"), goTo);
 			gallDisplay.one('transitionend webkitTransitionEnd', function(e){
