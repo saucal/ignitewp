@@ -108,24 +108,20 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 
 	switch (strtolower($attrs["order"])) {
 		case 'popular_asc':
-			$attrs["order"] = "ASC";
-			$attrs["orderby"] = "popularity";
+			$attrs["orderby"] = array("popularity" => "ASC");
 			break;
 
 		case 'popular_desc':
-			$attrs["order"] = "DESC";
-			$attrs["orderby"] = "popularity";
+			$attrs["orderby"] = array("popularity" => "DESC");
 			break;
 
 		case 'date_asc':
-			$attrs["order"] = "ASC";
-			$attrs["orderby"] = "post_date";
+			$attrs["orderby"] = array("date" => "ASC");
 			break;
 		
 		case 'date_desc':
 		default:
-			$attrs["order"] = "DESC";
-			$attrs["orderby"] = "post_date";
+			$attrs["orderby"] = array("date" => "DESC");
 			break;
 	}
 
@@ -141,6 +137,7 @@ function get_infinite_blog_sidebar_items($attrs = array()) {
 	} else {
 		unset($attrs["month"]);
 	}
+	$attrs["orderby"]["name"] = "DESC";
 
 	$posts = new WP_Query($attrs);
 	if(!empty($single) && $page == 1){
