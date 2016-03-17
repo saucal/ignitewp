@@ -11,6 +11,8 @@ function fix_autop($content) {
 
     return $content;
 }
-add_filter('acf_the_content', "fix_autop");
-add_filter('the_content', "fix_autop");
+add_action("init", function(){
+	add_filter('the_content', "fix_autop");
+	add_filter('acf_the_content', "fix_autop");
+});
 ?>
