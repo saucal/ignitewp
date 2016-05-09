@@ -7,8 +7,10 @@ Version: 1.0
 Author: Saucal Studios
 Author URI: http://saucal.com/
 */
-define("SAUCAL_TPL_BASEURL", get_stylesheet_directory_uri());
-define("SAUCAL_TPL_BASE", get_stylesheet_directory());
+define("SAUCAL_TPL_BASEURL", get_template_directory_uri());
+define("SAUCAL_TPL_BASE", get_template_directory());
+define("SAUCAL_STL_BASEURL", get_stylesheet_directory_uri());
+define("SAUCAL_STL_BASE", get_stylesheet_directory());
 define("IGNITE_BASE_URL", rtrim(plugin_dir_url( __FILE__ ), "/"));
 define("IGNITE_BASE", rtrim(plugin_dir_path( __FILE__ ), "/\\"));
 define("IGNITE_INCL", IGNITE_BASE."/inc/");

@@ -26,11 +26,14 @@ class Saucal_Lazy_Load_Patcher {
 		$this->output = $ret;
 		return "";
 	}
-	static function parse_lazy($html) {
-		if(substr($html, 0, 5) == "<?xml")
-			return $html;
+	static function parse_lazy($_html) {
+		if(substr($_html, 0, 5) == "<?xml")
+			return $_html;
 		
-		$html = str_get_html($html, true, true, DEFAULT_TARGET_CHARSET, false);
+		$html = str_get_html($_html, true, true, DEFAULT_TARGET_CHARSET, false);
+		if(!is_object($html)) {
+			return $_html;
+		}
 		$blankImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 		$placehold_it = new Placehold_it();
 		$selector_containers = apply_filters("lazy_load_selector_containers", array());
