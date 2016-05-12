@@ -95,6 +95,12 @@ function ignite_maybe_compile_less($url) {
 		$root = rtrim(ABSPATH, "/\\");
 		$rootUrl = get_option('home');
 
+		if(is_ssl()) {
+			$rootUrl = str_replace("http:", "https:", $rootUrl);
+		} else {
+			$rootUrl = str_replace("https:", "http:", $rootUrl);
+		}
+
 		$lessFilePath = str_replace($rootUrl, $root, $cleanUrl);
 		$lessFilePathBaseUrl = dirname($cleanUrl);
 		$lessFilePathBase = str_replace($rootUrl, $root, $lessFilePathBaseUrl);
