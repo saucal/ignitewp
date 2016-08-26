@@ -18,9 +18,6 @@ define("IGNITE_INCL", IGNITE_BASE."/inc/");
 //Init theme libraries
 require_once(IGNITE_INCL."core.php");
 
-//Disable Admin Bar
-show_admin_bar( false ); 
-
 //Define TPL_ID constant
 add_action("after_setup_theme", function(){
 	if(!defined("SAUCAL_TPL_ID"))
