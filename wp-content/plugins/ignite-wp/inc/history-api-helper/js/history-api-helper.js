@@ -160,6 +160,12 @@
 				console.error(e);
 			}
 		}
+		if(typeof _hsq != "undefined") {
+			$("link[rel='canonical']").attr("href", "");
+			_hsq.push(['setCanonicalUrl', '']);
+			_hsq.push(['setRelCanonicalUrl']);
+			_hsq.push(['trackPageView']);
+		}
     }
     SAUCAL_HISTORY_API.prototype.leadinAnalytics = function(url) {
     	var now, e, t, el;
