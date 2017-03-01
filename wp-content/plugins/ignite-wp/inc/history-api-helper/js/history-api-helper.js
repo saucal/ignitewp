@@ -151,10 +151,14 @@
 			_gaq.push(['_trackPageview', analyticsPath]);
 		}
 		if(typeof leadin != "undefined") {
-			if(typeof leadin.analytics == "undefined") 
-				leadin.analytics = {};
-			
-			leadin.analytics.trackingUrl = this.leadinAnalytics(url);
+			try {
+				if(typeof leadin.analytics == "undefined")
+					leadin.analytics = {};
+
+				leadin.analytics.trackingUrl = this.leadinAnalytics(url);
+			} catch (e) {
+				console.error(e);
+			}
 		}
     }
     SAUCAL_HISTORY_API.prototype.leadinAnalytics = function(url) {
@@ -163,8 +167,8 @@
 		now = Date.now || function() { return +(new Date); };
 		e = {
 			k: 1,
-			a: leadin.config.portalId,
-			vi: leadin.utils.getUtk(),
+			a: leadin.utils.getPortalId(),
+			//vi: leadin.utils.getUtk(),
 			cts: now(),
 			t: document.title
 		};
