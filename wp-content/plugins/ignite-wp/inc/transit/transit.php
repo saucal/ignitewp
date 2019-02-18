@@ -2,7 +2,7 @@
 //Require modules
 
 class Saucal_Transit {
-	function Saucal_Transit() {
+	function __construct() {
 		add_action("wp_enqueue_scripts", array($this, "wp_enqueue_scripts"), 3);
 		add_action("init", array($this, "init"));
 	}

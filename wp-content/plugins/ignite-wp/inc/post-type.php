@@ -3,7 +3,7 @@ if(!class_exists("SaucalCPT")){
 	Class SaucalCPT {
 		var $defaults;
 		var $opts;
-		public function SaucalCPT($name, $attr = null){
+		public function __construct($name, $attr = null){
 			$this->defaults = array(
 				"slug" => $name,
 				"slug_for_archive" => $name,
@@ -37,52 +37,50 @@ if(!class_exists("SaucalCPT")){
 					register_taxonomy($tax["slug"], $slug, $tax["config"]);
 					
 					
-					//register taxonomy column
-					$func = create_function('$column, $post_id', '
-						switch ($column)
-						{
-							case "'.$tax["slug"].'":  
-								if ( $category_list = get_the_term_list( $post_id, "'.$tax["slug"].'", "", ", ", "" ) ) {
+					//register taxonomy column  
+					add_action('manage_'.$slug.'_posts_custom_column', function ( $column, $post_id ) use ( $tax ) {
+						switch ($column) {
+							case $tax["slug"]:  
+								if ( $category_list = get_the_term_list( $post_id, $tax['slug'], '', ', ', '' ) ) {
 									echo $category_list;
 								} else {
 									echo "None";
 								}
 								break; 
-						}');    
-					add_action('manage_'.$slug.'_posts_custom_column',  $func, 10, 2);
+						}
+					}, 10, 2);
 					
 					if(isset($tax["filter_by"])){
-						if($tax["filter_by"] == true){
-							$func = create_function('', '
+						if($tax["filter_by"] == true){   
+							add_action( 'restrict_manage_posts', function() use( $slug, $tax ) {
 								global $typenow;
 								global $wp_query;
-								if ($typenow == "'.$slug.'") {
-									$taxonomy = "'.$tax["slug"].'";
+								if ($typenow == $slug) {
+									$taxonomy = $tax["slug"];
 									$business_taxonomy = get_taxonomy($taxonomy);
 									wp_dropdown_categories(array(
-										"show_option_all" =>  "Show All {$business_taxonomy->label}",
+										"show_option_all" =>  'Show All ' . $business_taxonomy->label,
 										"taxonomy"        =>  $taxonomy,
-										"name"            =>  "'.$tax["slug"].'",
+										"name"            =>  $tax["slug"],
 										"orderby"         =>  "name",
-										"selected"        =>  isset($wp_query->query["'.$tax["slug"].'"]) ? $wp_query->query["'.$tax["slug"].'"] : false,
+										"selected"        =>  isset($wp_query->query[$tax["slug"]]) ? $wp_query->query[$tax["slug"]] : false,
 										"hierarchical"    =>  true,
 										"depth"           =>  3,
 										"show_count"      =>  true,
 										"hide_empty"      =>  true
 									));
 								}
-								');    
-							add_action('restrict_manage_posts', $func);	
+							} );	
 							
-							$func = create_function('', '
+	 
+							add_filter( 'parse_query', function() use ( $tax ) {
 								global $pagenow;
 								$qv = &$query->query_vars;
-								if ($pagenow == "edit.php" && isset($qv["'.$tax["slug"].'"]) && is_numeric($qv["'.$tax["slug"].'"]) && $qv["'.$tax["slug"].'"] != "0") {
-									$term = get_term_by("id", $qv["'.$tax["slug"].'"], "'.$tax["slug"].'");
-									$qv["'.$tax["slug"].'"] = $term->slug;
+								if ($pagenow == "edit.php" && isset($qv[$tax["slug"]]) && is_numeric($qv[$tax["slug"]]) && $qv[$tax["slug"]] != "0") {
+									$term = get_term_by("id", $qv[$tax["slug"]], $tax["slug"]);
+									$qv[$tax["slug"]] = $term->slug;
 								}
-								');    
-							add_filter( 'parse_query', $func );
+							} );
 						}
 					}
 					array_push($taxonomies_for_post_type, $tax["slug"]);
@@ -212,7 +210,7 @@ if(!class_exists("SaucalCMB")){
 	Class SaucalCMB {
 		var $defaults;
 		var $opts;
-		function SaucalCMB($post_type, $metaboxes = array(), $template = false){
+		function __construct($post_type, $metaboxes = array(), $template = false){
 			$this->defaults = array(
 				"slug" => $post_type,
 				"meta_boxes" => $metaboxes,

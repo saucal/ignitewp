@@ -1,7 +1,7 @@
 <?php
 class Settings_Screen {
 	var $opts = array(); 
-    function Settings_Screen( $opts ) {
+    function __construct( $opts ) {
     	$this->opts = array_merge(array(
     		"title" => "Settings Page",
     		"settings" => array(),

@@ -1,6 +1,6 @@
 <?php
 class Saucal_WP_Commenting {
-	function Saucal_WP_Commenting() {
+	function __construct() {
 		add_filter("comment_form_defaults", array($this, "comment_form_defaults"));
 		add_action("comment_form_before_fields", array($this, "comment_form_before_fields"));
 		add_action("comment_form_after_fields", array($this, "comment_form_after_fields"));

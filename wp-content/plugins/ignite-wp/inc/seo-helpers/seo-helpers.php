@@ -1,6 +1,6 @@
 <?php
 Class Saucal_FakeTag {
-	function Saucal_FakeTag($tag) {
+	function __construct($tag) {
 		$this->tag = $tag;
 		add_shortcode($this->tag, array($this, "print_tag"));
 	}

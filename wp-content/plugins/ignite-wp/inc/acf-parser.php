@@ -2,7 +2,7 @@
 Class ACF_Parser {
 	private $opts = array();
 	private $acf_fields = array();
-	function ACF_Parser($sections, $options) {
+	function __construct($sections, $options) {
 		$options = array_merge(array(
 			"post_type" => false,
 			"template" => false,

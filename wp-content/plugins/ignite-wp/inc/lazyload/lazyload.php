@@ -4,7 +4,7 @@ require_once SAUCAL_TPL_LIB_DIR(__FILE__)."/inc/"."placehold_it.php";
 
 class Saucal_Lazy_Load_Patcher {
 	var $output = "";
-	function Saucal_Lazy_Load_Patcher() {
+	function __construct() {
 		add_action("wp_enqueue_scripts", array($this, "wp_enqueue_scripts"));
 		add_action("init", array($this, "init"));
 		add_action("shutdown", array($this, "shutdown"));

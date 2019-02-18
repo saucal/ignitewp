@@ -3,7 +3,7 @@ class SaucalCTR
 {
 	var $rules = array();
 	var $vars = array('custom_template');
-	function SaucalCTR() {
+	function __construct() {
 		add_action( 'init', array($this, "add_rules"));
 		add_filter( 'query_vars', array($this, "add_vars"));
 		add_filter( 'template_include', function( $template ) {

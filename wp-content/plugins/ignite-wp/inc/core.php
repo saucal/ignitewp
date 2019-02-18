@@ -125,13 +125,15 @@ class Ignite_Scripts {
                         if(did_action( $cb )) {
                             IgniteScripts()->enqueue_list($scripts);
                         } else {
-                            add_action($cb, create_function("", "return IgniteScripts()->enqueue_list(".var_export($scripts, true).");"), $prio);
-                        }
-                    }
-                }
-            }
-        }
-    }
+                            add_action($cb, function() use ($scripts) {
+								return IgniteScripts()->enqueue_list($scripts);
+                        	} , $prio);
+                    	}
+                	}
+            	}
+        	}
+		}
+	}
     function enqueue_list($list) {
         foreach($list as $script) {
             wp_enqueue_script($script[0]);
@@ -206,7 +208,9 @@ class Ignite_Styles {
                         if(did_action($cb)) {
                             IgniteStyles()->enqueue_list($scripts);
                         } else {
-                            add_action($cb, create_function("", "return IgniteStyles()->enqueue_list(".var_export($scripts, true).");"), $prio);
+							add_action($cb, function() use ($scripts) {
+								return IgniteStyles()->enqueue_list($scripts);
+                        	} , $prio);
                         }
                     }
                 }

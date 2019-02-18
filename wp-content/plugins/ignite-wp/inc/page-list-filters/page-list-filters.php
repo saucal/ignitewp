@@ -1,7 +1,7 @@
 <?php
 Class SaucalPageListFilter {
 	var $template;
-	function SaucalPageListFilter($template, $options = array()) {
+	function __construct($template, $options = array()) {
 		$this->template = $template;
 		add_filter( 'views_edit-page', array($this, "filter_add") );
 		add_filter( 'query_vars', array(__CLASS__, "add_query_vars") );
