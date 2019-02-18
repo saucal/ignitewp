@@ -1,32 +1,64 @@
 <?php
-ignite_register_script("ignite-masonry", "//cdnjs.cloudflare.com/ajax/libs/masonry/3.3.0/masonry.pkgd.js", array("jquery"), "3.3.0", false, 5 );
+ignite_register_script( 'ignite-masonry', '//cdnjs.cloudflare.com/ajax/libs/masonry/3.3.0/masonry.pkgd.js', array( 'jquery' ), '3.3.0', false, 5 );
 
-function ignite_masonry_gallery($content, $attr ) {
+function ignite_masonry_gallery( $content, $attr ) {
 	$html5 = current_theme_supports( 'html5', 'gallery' );
-	$atts = shortcode_atts( array(
-		'order'      => 'ASC',
-		'orderby'    => 'menu_order ID',
-		'id'         => $post ? $post->ID : 0,
-		'itemtag'    => $html5 ? 'figure'     : 'dl',
-		'icontag'    => $html5 ? 'div'        : 'dt',
-		'captiontag' => $html5 ? 'figcaption' : 'dd',
-		'columns'    => 3,
-		'size'       => 'large',
-		'include'    => '',
-		'exclude'    => '',
-		'link'       => ''
-	), $attr, 'gallery' );
+	$atts = shortcode_atts(
+		array(
+			'order'      => 'ASC',
+			'orderby'    => 'menu_order ID',
+			'id'         => $post ? $post->ID : 0,
+			'itemtag'    => $html5 ? 'figure' : 'dl',
+			'icontag'    => $html5 ? 'div' : 'dt',
+			'captiontag' => $html5 ? 'figcaption' : 'dd',
+			'columns'    => 3,
+			'size'       => 'large',
+			'include'    => '',
+			'exclude'    => '',
+			'link'       => '',
+		),
+		$attr,
+		'gallery'
+	);
 	$id = intval( $atts['id'] );
 	if ( ! empty( $atts['include'] ) ) {
-		$_attachments = get_posts( array( 'include' => $atts['include'], 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+		$_attachments = get_posts(
+			array(
+				'include' => $atts['include'],
+				'post_status' => 'inherit',
+				'post_type' => 'attachment',
+				'post_mime_type' => 'image',
+				'order' => $atts['order'],
+				'orderby' => $atts['orderby'],
+			)
+		);
 		$attachments = array();
 		foreach ( $_attachments as $key => $val ) {
-			$attachments[$val->ID] = $_attachments[$key];
+			$attachments[ $val->ID ] = $_attachments[ $key ];
 		}
 	} elseif ( ! empty( $atts['exclude'] ) ) {
-		$attachments = get_children( array( 'post_parent' => $id, 'exclude' => $atts['exclude'], 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+		$attachments = get_children(
+			array(
+				'post_parent' => $id,
+				'exclude' => $atts['exclude'],
+				'post_status' => 'inherit',
+				'post_type' => 'attachment',
+				'post_mime_type' => 'image',
+				'order' => $atts['order'],
+				'orderby' => $atts['orderby'],
+			)
+		);
 	} else {
-		$attachments = get_children( array( 'post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $atts['order'], 'orderby' => $atts['orderby'] ) );
+		$attachments = get_children(
+			array(
+				'post_parent' => $id,
+				'post_status' => 'inherit',
+				'post_type' => 'attachment',
+				'post_mime_type' => 'image',
+				'order' => $atts['order'],
+				'orderby' => $atts['orderby'],
+			)
+		);
 	}
 	if ( empty( $attachments ) ) {
 		return '';
@@ -52,7 +84,7 @@ function ignite_masonry_gallery($content, $attr ) {
 		$icontag = 'dt';
 	}
 	$columns = intval( $atts['columns'] );
-	$itemwidth = $columns > 0 ? floor(100/$columns) : 100;
+	$itemwidth = $columns > 0 ? floor( 100 / $columns ) : 100;
 	$float = is_rtl() ? 'right' : 'left';
 	$selector = "gallery-{$id}";
 	$gallery_style = '';
@@ -102,7 +134,9 @@ function ignite_masonry_gallery($content, $attr ) {
 	$output .= "<{$itemtag} class='grid-sizer'></{$itemtag}>";
 
 	foreach ( $attachments as $id => $attachment ) {
-		$attr = ( trim( $attachment->post_excerpt ) ) ? array( 'aria-describedby' => "$selector-$id" ) : '';
+		$attr = ( trim( $attachment->post_excerpt ) ) ? array(
+			'aria-describedby' => "$selector-$id",
+		) : '';
 		if ( ! empty( $atts['link'] ) && 'file' === $atts['link'] ) {
 			$image_output = wp_get_attachment_link( $id, $atts['size'], false, false, false, $attr );
 		} elseif ( ! empty( $atts['link'] ) && 'none' === $atts['link'] ) {
@@ -120,10 +154,10 @@ function ignite_masonry_gallery($content, $attr ) {
 			<{$icontag} class='gallery-icon {$orientation}'>
 				$image_output
 			</{$icontag}>";
-		if ( $captiontag && trim($attachment->post_excerpt) ) {
+		if ( $captiontag && trim( $attachment->post_excerpt ) ) {
 			$output .= "
 				<{$captiontag} class='wp-caption-text gallery-caption' id='$selector-$id'>
-				" . wptexturize($attachment->post_excerpt) . "
+				" . wptexturize( $attachment->post_excerpt ) . "
 				</{$captiontag}>";
 		}
 		$output .= "</{$itemtag}>";
@@ -133,6 +167,6 @@ function ignite_masonry_gallery($content, $attr ) {
 	return $output;
 }
 
-add_filter( 'post_gallery', "ignite_masonry_gallery", 90, 2);
+add_filter( 'post_gallery', 'ignite_masonry_gallery', 90, 2 );
 
-?>
+
