@@ -32,7 +32,7 @@
 		if(!post)
 			post = $(document);
 
-		post.find('a[href$=".png"], a[href$=".jpg"], a[href$=".jpeg"], a[href$=".gif"], a[rel^="attachment "], .gallery a, .wp-caption > a').each(function(){
+		post.find('a[href$=".png"], a[href$=".jpg"], a[href$=".jpeg"], a[href$=".gif"], a[rel^="attachment "], .gallery a, .wp-caption > a').not(".ib-ignore").each(function(){
 			var thisLink = $(this);
 			if(typeof thisLink.data("ingitebox-init-def") != "undefined") //if we initialized this already, skip
 				return;
@@ -52,7 +52,7 @@
 				id = "";
 
 			id = id.match(/wp-image-([0-9]+)(?:\s|$)/);
-			if(typeof id[1] != "undefined")
+			if(id !== null && typeof id[1] != "undefined")
 				id = id[1]
 			else 
 				id = 0;
@@ -87,6 +87,9 @@
 
 			if(gallery.length == 0)
 				gallery = thisLink.parents(".hentry").first();
+
+			if(gallery.length == 0)
+				gallery = thisLink.parents("body").first();
 			
 			thisLink.data("ignitebox-gallery", gallery);
 			gallery.data("ignitebox-pictures", []);
@@ -250,6 +253,22 @@
 			}
 		});
 	}
+
+	$(document).on("keyup", function(e) {
+		var gallery = $("#ignitebox");
+		if(gallery.length == 0) {
+			return;
+		}
+		if (e.keyCode == 27) { // escape key maps to keycode `27`
+			gallery.find(".ignitebox-action-close").trigger("click");
+		}
+		if (e.keyCode == 39) { // right arrow key maps to keycode `39`
+			gallery.find(".ignitebox-action-next").trigger("click");
+		}
+		if (e.keyCode == 37) { // right arrow key maps to keycode `37`
+			gallery.find(".ignitebox-action-prev").trigger("click");
+		}
+	});
 
 	function drawGallery(pics, goTo) {
 		if(typeof goTo == "undefined" || typeof goTo != "number")
