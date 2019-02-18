@@ -28,9 +28,3 @@ add_action("wp_enqueue_scripts", function(){
 	global $wp_scripts;
 	$wp_scripts->registered["underscore"]->args = NULL; //make underscore load where needed, not only in footer forced scripts
 });
-
-add_action("init", function(){
-	wp_register_script( "saucal-jquery-extension", IGNITE_BASE_URL."/js/inc/saucal-jquery-extension.js", array("underscore", "jquery"), "3.0", false );
-});
-
-?>
